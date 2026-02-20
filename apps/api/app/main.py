@@ -4,11 +4,13 @@ from app.routes import chat_route
 import uvicorn
 import os
 from app.core.database import engine, Base
+from app.routes import project_route
 
 load_dotenv()
 app = FastAPI(title="Rohit AI Portfolio API")
 
 app.include_router(chat_route.router)
+app.include_router(project_route.router)
 
 @app.get("/")
 def root():

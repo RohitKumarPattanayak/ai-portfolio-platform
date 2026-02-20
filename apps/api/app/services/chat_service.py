@@ -5,7 +5,7 @@ from app.models.resume_chunk_model import ResumeChunkModel
 from sqlalchemy import select
 from openai import AsyncOpenAI
 import os
-
+from app.repositories.chat_repository import ChatRepository
 
 class ChatService:
 
@@ -99,3 +99,59 @@ class ChatService:
             }
             for p in projects
         ]
+
+    async def stream_response(self, user_message: str):
+
+        intent = self._detect_intent(user_message)
+
+        if intent == "list_projects":
+            projects = await self._list_projects()
+            yield str({
+                "type": "projects_list",
+                "data": projects
+            })
+            return
+
+        history = await self._get_recent_history()
+        relevant_chunks = await self.vector_service.search(user_message)
+
+        context_text = "\n\n".join(relevant_chunks)
+
+        messages = [
+            {
+                "role": "system",
+                "content": "You are a professional AI assistant representing a software engineer."
+            },
+            {
+                "role": "system",
+                "content": f"Relevant Resume Context:\n{context_text}"
+            }
+        ]
+
+        messages.extend(history)
+
+        messages.append({
+            "role": "user",
+            "content": user_message
+        })
+
+        stream = await self.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            temperature=0.3,
+            stream=True
+        )
+
+        full_response = ""
+
+        async for chunk in stream:
+            if chunk.choices[0].delta.content:
+                token = chunk.choices[0].delta.content
+                full_response += token
+                yield token
+
+        # store conversation after completion
+        chat_repo = ChatRepository(self.session)
+
+        await chat_repo.create_message("user", user_message)
+        await chat_repo.create_message("assistant", full_response)
