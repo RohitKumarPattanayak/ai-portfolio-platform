@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from app.models.resume_chunk_model import ResumeChunkModel
 from sqlalchemy import update
 
+
 class ResumeRepository:
 
     def __init__(self, session: AsyncSession):
@@ -86,7 +87,6 @@ class ResumeRepository:
         await self.session.refresh(chunk)
         return chunk
 
-
     async def search_similar_chunks(
         self,
         query_embedding: list[float],
@@ -101,7 +101,8 @@ class ResumeRepository:
             select(ResumeChunkModel)
             .where(ResumeChunkModel.resume_id == active_resume.id)
             .order_by(
-                ResumeChunkModel.embedding.l2_distance(query_embedding) # semantic search is being performed here
+                # semantic search is being performed here
+                ResumeChunkModel.embedding.l2_distance(query_embedding)
             )
             .limit(limit)
         )
