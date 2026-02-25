@@ -5,6 +5,7 @@ import json
 from app.utils import constants
 from app.repositories.usage_repository import UsageRepository
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.cache import cache
 
 
 class IntentService:
@@ -15,7 +16,7 @@ class IntentService:
         self.usage_repo = UsageRepository(self.session)
 
     async def classify(self, message: str) -> str:
-
+        cache_key = f"intent:{message}"
         prompt = f"""
         Classify the user's intent.
 
@@ -28,6 +29,10 @@ class IntentService:
         User message:
         {message}
         """
+
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
 
         response = await self.client.chat.completions.create(
             model="gpt-4o-mini",
@@ -61,6 +66,9 @@ class IntentService:
             total_tokens=response.usage.total_tokens
         )
         try:
-            return response.choices[0].message.parsed["intent"]
+            intent = response.choices[0].message.parsed["intent"]
+            cache.set(cache_key, intent)
+
+            return intent
         except Exception:
             return "semantic_search"

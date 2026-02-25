@@ -4,6 +4,7 @@ from openai import AsyncOpenAI
 import os
 from app.repositories.usage_repository import UsageRepository
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.cache import cache
 
 
 class EmbeddingService:
@@ -19,18 +20,25 @@ class EmbeddingService:
         self.usage_repo = UsageRepository(session)
 
     async def generate_embedding(self, text: str) -> list[float]:
-        """
-        Generates vector embedding for given text.
-        """
+        cache_key = f"embedding:{text}"
+
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
 
         response = await self.client.embeddings.create(
             model="text-embedding-3-small",
             input=text
         )
+
         await self.usage_repo.log_usage(
             feature="embedding-service",
             prompt_tokens=response.usage.prompt_tokens,
             completion_tokens=response.usage.completion_tokens,
             total_tokens=response.usage.total_tokens
         )
-        return response.data[0].embedding
+
+        embedding = response.data[0].embedding
+        cache.set(cache, embedding)
+
+        return embedding

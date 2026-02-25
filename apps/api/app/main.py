@@ -5,6 +5,7 @@ import uvicorn
 import os
 from app.core.database import engine, Base
 from app.routes import project_route
+from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 app = FastAPI(title="Rohit AI Portfolio API")
@@ -12,9 +13,19 @@ app = FastAPI(title="Rohit AI Portfolio API")
 app.include_router(chat_route.router)
 app.include_router(project_route.router)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or specific URLs
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 @app.get("/")
 def root():
     return {"message": "AI Portfolio API Running"}
+
 
 @app.on_event("startup")
 async def startup():
