@@ -23,3 +23,20 @@ class UsageRepository:
 
         self.session.add(usage)
         await self.session.commit()
+
+    async def usage_track(self, response, feature='ussage-log'):
+        usage = getattr(response, "usage", None)
+        if usage == None:
+            return False
+        prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
+        completion_tokens = getattr(
+            usage, "completion_tokens", 0) if usage else 0
+        total_tokens = getattr(usage, "total_tokens", 0) if usage else 0
+
+        await self.log_usage(
+            feature=feature,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            total_tokens=total_tokens
+        )
+        return True
