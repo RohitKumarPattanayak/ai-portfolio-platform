@@ -1,6 +1,8 @@
+from tkinter import constants
 from openai import AsyncOpenAI
 import os
 import json
+from app.utils import constants
 
 
 class IntentService:
@@ -31,13 +33,26 @@ User message:
                 {"role": "system", "content": "You classify user intents."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0
+            temperature=0,
+            response_format={
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "intent_classification",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "intent": {
+                                "type": "string",
+                                "enum": constants.SEGREGATION_ARR
+                            }
+                        },
+                        "required": ["intent"]
+                    }
+                }
+            }
         )
 
-        content = response.choices[0].message.content
-
         try:
-            data = json.loads(content)
-            return data.get("intent", "semantic_search")
+            return response.choices[0].message.parsed["intent"]
         except Exception:
             return "semantic_search"

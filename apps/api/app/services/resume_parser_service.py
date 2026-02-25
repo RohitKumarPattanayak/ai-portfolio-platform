@@ -1,6 +1,9 @@
+from tkinter import constants
 from openai import AsyncOpenAI
 import os
 import json
+from app.utils import constants
+
 
 class ResumeParserService:
 
@@ -43,9 +46,39 @@ class ResumeParserService:
                 {"role": "system", "content": "You extract structured resume data."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0 # Randomness
+            temperature=0,  # Randomness
+            response_format={
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "resume_structure",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "projects": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {"type": "string"},
+                                        "company": {"type": "string"},
+                                        "tech_stack": {
+                                            "type": "array",
+                                            "items": {"type": "string"}
+                                        },
+                                        "description": {"type": "string"},
+                                        "impact": {"type": "string"}
+                                    },
+                                    "required": constants.RESUME_PARSE_SECTION
+                                }
+                            },
+                            "experience": {"type": "array"},
+                            "skills": {"type": "array"},
+                            "education": {"type": "array"}
+                        },
+                        "required": ["projects"]
+                    }
+                }
+            }
         )
 
-        content = response.choices[0].message.content
-
-        return json.loads(content)
+        return response.choices[0].message.parsed
