@@ -14,9 +14,7 @@ class ResumeIngestionService:
     async def upload_resume(self, name: str, raw_text: str):
 
         resume = await self.resumeRepo.create_resume(name)
-
         structured_data = await self.parser_service.parse_resume(raw_text)
-
         for project in structured_data.get("projects", []):
             await self._store_structured_chunk(
                 resume.id,
