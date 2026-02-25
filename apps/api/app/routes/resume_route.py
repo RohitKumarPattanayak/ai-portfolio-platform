@@ -6,6 +6,7 @@ from app.core.dependencies import get_db
 from app.services.resume_injestion_service import ResumeIngestionService
 from app.repositories.resume_repository import ResumeRepository
 from app.models.resume_model import ResumeModel
+from app.services.file_parser import FileParserService
 
 router = APIRouter(prefix="/resume", tags=["Resume"])
 
@@ -16,11 +17,12 @@ async def upload_resume(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db)
 ):
-    content = await file.read()
-    text = content.decode("utf-8")
+    RIservice = ResumeIngestionService(db)
+    Fservice = FileParserService()
 
-    service = ResumeIngestionService(db)
-    resume = await service.upload_resume(name=name, raw_text=text)
+    content = await file.read()
+    text = Fservice.parse(file.filename, content)
+    resume = await RIservice.upload_resume(name=name, raw_text=text)
 
     return {"message": "Resume uploaded", "resume_id": resume.id}
 
