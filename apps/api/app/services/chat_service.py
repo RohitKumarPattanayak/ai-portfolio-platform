@@ -9,6 +9,7 @@ from app.repositories.chat_repository import ChatRepository
 from app.services.intent_service import IntentService
 from app.repositories.usage_repository import UsageRepository
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.logger import logger
 
 
 class ChatService:
@@ -29,9 +30,11 @@ class ChatService:
 
         # Structured path
         if intent == "list_projects":
+            data = await self._list_projects()
+            logger.info("generate_response - Projects list response generated successfully")
             return {
                 "type": "projects_list",
-                "data": await self._list_projects()
+                "data": data
             }
 
         # Semantic path
@@ -60,16 +63,21 @@ class ChatService:
 
         await self.usage_repo.usage_track(response, "generate-response")
 
-        return {
+        result = {
             "type": "text",
             "data": response.choices[0].message.content
         }
+
+        logger.info("generate_response - Text response generated successfully")
+
+        return result
 
     async def _list_projects(self):
         repo = ResumeRepository(self.session)
         active_resume = await repo.get_active_resume()
 
         if not active_resume:
+            logger.info("_list_projects - No active resume found, returning message - success")
             return "No active resume found."
 
         result = await self.session.execute(
@@ -83,9 +91,10 @@ class ChatService:
         projects = result.scalars().all()
 
         if not projects:
+            logger.info("_list_projects - No projects found, returning message - success")
             return "No projects found."
 
-        return [
+        projects_data = [
             {
                 "id": p.id,
                 "title": p.meta_data.get("title"),
@@ -95,12 +104,17 @@ class ChatService:
             for p in projects
         ]
 
+        logger.info("_list_projects - Projects listed successfully")
+
+        return projects_data
+
     async def stream_response(self, user_message: str, mode: str = "candidate"):
 
         intent = await self.intent_service.classify(user_message)
 
         if intent == "list_projects":
             projects = await self._list_projects()
+            logger.info("stream_response - Projects list stream generated successfully")
             yield str({
                 "type": "projects_list",
                 "data": projects
@@ -138,6 +152,8 @@ class ChatService:
         )
 
         await self.usage_repo.usage_track(stream, "stream-response")
+
+        logger.info("stream_response - Streaming response created successfully")
 
         full_response = ""
 

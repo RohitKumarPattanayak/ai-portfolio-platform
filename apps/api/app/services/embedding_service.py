@@ -5,6 +5,7 @@ import os
 from app.repositories.usage_repository import UsageRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.cache import cache
+from app.core.logger import logger
 
 
 class EmbeddingService:
@@ -24,6 +25,7 @@ class EmbeddingService:
 
         cached = cache.get(cache_key)
         if cached:
+            logger.info("generate_embedding - Embedding fetched from cache successfully")
             return cached
 
         response = await self.client.embeddings.create(
@@ -35,5 +37,7 @@ class EmbeddingService:
 
         embedding = response.data[0].embedding
         cache.set(cache, embedding)
+
+        logger.info("generate_embedding - Embedding generated and cached successfully")
 
         return embedding

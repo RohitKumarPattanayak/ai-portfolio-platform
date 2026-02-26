@@ -7,6 +7,7 @@ from app.services.resume_injestion_service import ResumeIngestionService
 from app.repositories.resume_repository import ResumeRepository
 from app.models.resume_model import ResumeModel
 from app.services.file_parser import FileParserService
+from app.core.logger import logger
 
 router = APIRouter(prefix="/resume", tags=["Resume"])
 
@@ -24,6 +25,8 @@ async def upload_resume(
     text = Fservice.parse(file.filename, content)
     resume = await RIservice.upload_resume(name=name, raw_text=text)
 
+    logger.info("upload_resume - Resume uploaded successfully")
+
     return {"message": "Resume uploaded", "resume_id": resume.id}
 
 
@@ -31,6 +34,8 @@ async def upload_resume(
 async def list_resumes(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(ResumeModel))
     resumes = result.scalars().all()
+
+    logger.info("list_resumes - Resumes listed successfully")
 
     return [
         {
@@ -46,6 +51,9 @@ async def list_resumes(db: AsyncSession = Depends(get_db)):
 async def activate_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
     repo = ResumeRepository(db)
     await repo.switch_active_resume(resume_id)
+
+    logger.info("activate_resume - Resume activated successfully")
+
     return {"message": "Resume activated"}
 
 
@@ -53,4 +61,7 @@ async def activate_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
 async def delete_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
     repo = ResumeRepository(db)
     await repo.delete_resume(resume_id)
+
+    logger.info("delete_resume - Resume deleted successfully")
+
     return {"message": "Resume deleted"}

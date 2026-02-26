@@ -4,6 +4,7 @@ from sqlalchemy import select
 from app.core.dependencies import get_db
 from app.models.resume_chunk_model import ResumeChunkModel
 from app.repositories.resume_repository import ResumeRepository
+from app.core.logger import logger
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
@@ -14,6 +15,7 @@ async def list_projects(db: AsyncSession = Depends(get_db)):
     active_resume = await repo.get_active_resume()
 
     if not active_resume:
+        logger.info("list_projects - No active resume found, returning empty list - success")
         return []
 
     result = await db.execute(
@@ -28,7 +30,7 @@ async def list_projects(db: AsyncSession = Depends(get_db)):
     rows = result.all()
 
     if len(rows):
-        return [
+        projects = [
             {
                 "id": row.id,
                 "title": row.meta_data.get("title"),
@@ -37,6 +39,10 @@ async def list_projects(db: AsyncSession = Depends(get_db)):
             }
             for row in rows
         ]
+        logger.info("list_projects - Projects listed successfully")
+        return projects
+
+    logger.info("list_projects - No projects found, returning empty list - success")
     return []
 
 
@@ -61,7 +67,8 @@ async def get_project(project_id: int, db: AsyncSession = Depends(get_db)):
     project = result.mappings().one_or_none()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    return {
+
+    response = {
         "id": project.id,
         "title": project.meta_data.get("title"),
         "company": project.meta_data.get("company"),
@@ -69,3 +76,7 @@ async def get_project(project_id: int, db: AsyncSession = Depends(get_db)):
         "description": project.meta_data.get("description"),
         "impact": project.meta_data.get("impact"),
     }
+
+    logger.info("get_project - Project fetched successfully")
+
+    return response

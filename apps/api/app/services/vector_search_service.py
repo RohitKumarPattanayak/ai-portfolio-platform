@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.embedding_service import EmbeddingService
 from app.repositories.resume_repository import ResumeRepository
+from app.core.logger import logger
 
 
 class VectorSearchService:
@@ -27,4 +28,8 @@ class VectorSearchService:
             limit=limit
         )
 
-        return [chunk.content for chunk in chunks]
+        results = [chunk.content for chunk in chunks]
+
+        logger.info("search - Vector search completed successfully")
+
+        return results

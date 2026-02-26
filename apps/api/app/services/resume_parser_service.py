@@ -5,6 +5,7 @@ from app.utils import response_format_constants
 from app.utils.prompt_templates import TEMPLATE_FACTORY
 from app.repositories.usage_repository import UsageRepository
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.logger import logger
 
 
 class ResumeParserService:
@@ -36,5 +37,7 @@ class ResumeParserService:
 
         content = response.choices[0].message.content
         parsed_json = json.loads(content)
+
+        logger.info("parse_resume - Resume parsed successfully")
 
         return parsed_json

@@ -18,7 +18,7 @@ DATABASE_URL = (
 
 engine = create_async_engine(
     DATABASE_URL,
-    echo=True
+    echo=False,  # Switched off sqlalchemy logs
 )
 
 AsyncSessionLocal = async_sessionmaker(

@@ -1,6 +1,7 @@
 from app.services.resume_parser_service import ResumeParserService
 from app.services.embedding_service import EmbeddingService
 from app.repositories.resume_repository import ResumeRepository
+from app.core.logger import logger
 
 
 class ResumeIngestionService:
@@ -32,6 +33,8 @@ class ResumeIngestionService:
                 )
 
         await self.resumeRepo.switch_active_resume(resume.id)
+
+        logger.info("upload_resume - Resume ingested and activated successfully")
 
         return resume
 
@@ -85,6 +88,7 @@ class ResumeIngestionService:
 
         # Avoid embedding empty content
         if content_for_embedding.strip() == f"Section: {section}":
+            logger.info("_store_structured_chunk - No content to embed for section, skipping - success")
             return
 
         embedding = await self.embedding_service.generate_embedding(
@@ -98,3 +102,5 @@ class ResumeIngestionService:
             content=content_for_embedding,
             embedding=embedding
         )
+
+        logger.info("_store_structured_chunk - Structured chunk stored successfully")

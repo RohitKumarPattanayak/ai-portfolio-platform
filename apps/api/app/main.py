@@ -5,6 +5,8 @@ import os
 from app.core.database import engine, Base
 from app.routes import project_route, chat_route, resume_route, health_route, analytics_route, test_route
 from fastapi.middleware.cors import CORSMiddleware
+from app.middleware.logging_middleware import LoggingMiddleware
+from app.core.logger import logger
 
 load_dotenv()
 app = FastAPI(title="Rohit AI Portfolio API")
@@ -16,17 +18,21 @@ app.include_router(project_route.router)
 app.include_router(analytics_route.router)
 app.include_router(test_route.router)
 
+# First add logging middleware
+app.add_middleware(LoggingMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # or specific URLs
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
 
 @app.get("/")
 def root():
+    logger.info("root - Root endpoint hit successfully")
     return {"message": "AI Portfolio API Running"}
 
 
@@ -34,6 +40,8 @@ def root():
 async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    logger.info("startup - Database tables created successfully")
 
 
 if __name__ == "__main__":

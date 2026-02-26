@@ -7,6 +7,7 @@ from fastapi import Depends
 from fastapi.responses import StreamingResponse
 from app.core.dependencies import get_db
 from app.services.chat_service import ChatService
+from app.core.logger import logger
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
@@ -19,6 +20,9 @@ class ChatRequest(BaseModel):
 async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
     repo = ChatRepository(db)
     await repo.create_message("user", request.message)
+
+    logger.info("chat - Chat message stored successfully")
+
     return {"response": "Message stored successfully"}
 
 
@@ -26,6 +30,9 @@ async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
 async def get_chat(db: AsyncSession = Depends(get_db)):
     repo = ChatRepository(db)
     messages = await repo.get_recent_messages()
+
+    logger.info("get_chat - Chat messages fetched successfully")
+
     return {"messages": messages}
 
 
@@ -33,6 +40,9 @@ async def get_chat(db: AsyncSession = Depends(get_db)):
 async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
     chat_service = ChatService(db)
     reply = await chat_service.generate_response(request.message)
+
+    logger.info("chat - Chat reply generated successfully")
+
     return {
         "response": reply
     }
@@ -44,7 +54,11 @@ async def stream_chat(request: ChatRequest,
                       db: AsyncSession = Depends(get_db)
                       ):
     chat_service = ChatService(db)
-    return StreamingResponse(
+    response = StreamingResponse(
         chat_service.stream_response(request.message, mode),
         media_type="text/plain"
     )
+
+    logger.info("stream_chat - Streaming chat response started successfully")
+
+    return response

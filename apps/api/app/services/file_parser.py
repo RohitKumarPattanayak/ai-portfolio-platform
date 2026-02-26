@@ -3,6 +3,7 @@ from typing import Callable, Dict
 from fastapi import HTTPException
 from pypdf import PdfReader
 from docx import Document
+from app.core.logger import logger
 
 
 class FileParserService:
@@ -20,7 +21,11 @@ class FileParserService:
             raise HTTPException(
                 status_code=400, detail="Unsupported file type")
 
-        return parser(content)
+        result = parser(content)
+
+        logger.info("parse - File parsed successfully")
+
+        return result
 
     def _get_extension(self, filename: str) -> str:
         return filename.lower().split(".")[-1]
