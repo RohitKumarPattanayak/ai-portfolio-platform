@@ -14,6 +14,7 @@ class ResumeParserService:
         self.client = AsyncOpenAI(
             api_key=os.getenv("OPENAI_API_KEY")
         )
+        self.model = os.getenv("AI_MODEL", "gpt-4o-mini")
         self.usage_repo = UsageRepository(session)
 
     async def parse_resume(self, user_text: str) -> dict:
@@ -22,7 +23,7 @@ class ResumeParserService:
                 raw_text=user_text
             )
             response = await self.client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=self.model,
                 messages=[
                     {
                         "role": "system",

@@ -22,8 +22,10 @@ class ChatService:
         self.client = AsyncOpenAI(
             api_key=os.getenv("OPENAI_API_KEY")
         )
+        self.model = os.getenv("AI_MODEL", "gpt-4o-mini")
         self.intent_service = IntentService(session)
         self.usage_repo = UsageRepository(session)
+        self.chat_repo = ChatRepository(session)
 
     # @deprecated
     # async def generate_response(self, user_message: str):
@@ -41,7 +43,7 @@ class ChatService:
     #         relevant_chunks = await self.vector_service.search(user_message)
     #         context_text = "\n\n".join(relevant_chunks)
     #         response = await self.client.chat.completions.create(
-    #             model="gpt-4o-mini",
+    #             model=self.model,
     #             messages=[
     #                 {
     #                     "role": "system",
@@ -110,11 +112,9 @@ class ChatService:
             logger.error("_list_projects - Error occurred", exc_info=True)
             raise
 
-    async def stream_response(self, user_message: str, mode: str = "candidate"):
-
+    async def stream_response(self, user_id: int, user_message: str, mode: str = "candidate"):
         try:
             intent = await self.intent_service.classify(user_message)
-
             if intent == "list_projects":
                 projects = await self._list_projects()
                 logger.info(
@@ -124,12 +124,16 @@ class ChatService:
                     "data": projects
                 })
                 return
+            history = await self.chat_repo.get_recent_messages(user_id)
+            formatted_history = [
+                {"role": msg.role, "content": msg.message}
+                for msg in reversed(history)
+            ]
 
-            history = await self._get_recent_history()
+            # can check for future use
+            # summary = await self.summarize_history(formatted_history)
             relevant_chunks = await self.vector_service.search(user_message)
-
             context_text = "\n\n".join(relevant_chunks)
-
             messages = [
                 {
                     "role": "system",
@@ -140,39 +144,28 @@ class ChatService:
                     "content": f"Relevant Resume Context:\n{context_text}"
                 }
             ]
-
-            messages.extend(history)
-
+            messages.extend(formatted_history)
             messages.append({
                 "role": "user",
                 "content": user_message
             })
-
             stream = await self.client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=self.model,
                 messages=messages,
                 temperature=0.3,
                 stream=True
             )
-
             await self.usage_repo.usage_track(stream, "stream-response")
-
             logger.info(
                 "stream_response - Streaming response created successfully")
-
             full_response = ""
-
             async for chunk in stream:
                 if chunk.choices[0].delta.content:
                     token = chunk.choices[0].delta.content
                     full_response += token
                     yield token
-
-            # store conversation after completion
-            chat_repo = ChatRepository(self.session)
-
-            await chat_repo.create_message("user", user_message)
-            await chat_repo.create_message("assistant", full_response)
+            await self.chat_repo.create_message("user", user_message)
+            await self.chat_repo.create_message("assistant", full_response)
         except Exception as e:
             logger.error("stream_response - Error occurred", exc_info=True)
             raise
@@ -192,3 +185,37 @@ class ChatService:
     Respond with technical clarity.
     Explain architecture decisions and implementation details when needed.
     """
+
+    async def summarize_history(self, history: list):
+        try:
+            if not history:
+                logger.info("summarize_history - No history provided")
+                return ""
+
+            summary_prompt = [
+                {
+                    "role": "system",
+                    "content": (
+                        "Summarize the following conversation briefly. "
+                        "Keep important technical details, decisions, "
+                        "user goals, and context. Be concise."
+                    )
+                }
+            ]
+
+            summary_prompt.extend(history)
+
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=summary_prompt,
+                temperature=0.2,
+            )
+
+            await self.usage_repo.usage_track(response, "summarize-history")
+            summary = response.choices[0].message.content.strip()
+
+            logger.info("summarize_history - Summary generated successfully")
+            return summary
+        except Exception:
+            logger.error("summarize_history - Error occurred", exc_info=True)
+            return ""

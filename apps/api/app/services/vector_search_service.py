@@ -15,10 +15,6 @@ class VectorSearchService:
         self.resumeRepo = ResumeRepository(session)
 
     async def search(self, query: str, limit: int = 5):
-        """
-        Perform semantic search over active resume chunks.
-        """
-
         try:
             # 1️⃣ Generate query embedding
             query_embedding = await self.embedding_service.generate_embedding(query)
@@ -35,5 +31,6 @@ class VectorSearchService:
 
             return results
         except Exception as e:
-            logger.error("search - Error occurred in VectorSearchService", exc_info=True)
+            logger.error(
+                "search - Error occurred in VectorSearchService", exc_info=True)
             raise

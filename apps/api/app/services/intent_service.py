@@ -10,9 +10,11 @@ from app.core.logger import logger
 
 class IntentService:
     def __init__(self, session: AsyncSession):
+        self.session = session
         self.client = AsyncOpenAI(
             api_key=os.getenv("OPENAI_API_KEY")
         )
+        self.model = os.getenv("AI_MODEL", "gpt-4o-mini")
         self.usage_repo = UsageRepository(self.session)
 
     async def classify(self, message: str) -> str:
@@ -38,7 +40,7 @@ class IntentService:
                 return cached
 
             response = await self.client.chat.completions.create(
-                model="gpt-4o-mini",
+            model=self.model,
                 messages=[
                     {"role": "system", "content": "You classify user intents."},
                     {"role": "user", "content": prompt}

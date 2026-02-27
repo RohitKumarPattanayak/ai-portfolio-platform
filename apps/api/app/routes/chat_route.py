@@ -9,14 +9,16 @@ from fastapi.responses import StreamingResponse
 from app.core.dependencies import get_db
 from app.services.chat_service import ChatService
 from app.core.logger import logger
+from pydantic import BaseModel, Field
+from app.models.z_enums import UserMode
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
 
-class ChatRequest(BaseModel):
-    message: str
-
-
+class StreamChatRequest(BaseModel):
+    user_id: int
+    message: str = Field(..., min_length=1)
+    mode: UserMode
 # @deprecated
 # @router.post("/")
 # async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
@@ -51,15 +53,21 @@ class ChatRequest(BaseModel):
 #         logger.error(
 #             "chat - Error occurred while generating reply", exc_info=True)
 #         raise
+
+
 @router.post("/conversation")
-async def stream_chat(request: ChatRequest,
+async def stream_chat(request: StreamChatRequest,
                       mode: str = Query("candidate"),
                       db: AsyncSession = Depends(get_db)
                       ):
     try:
         chat_service = ChatService(db)
         response = StreamingResponse(
-            chat_service.stream_response(request.message, mode),
+            chat_service.stream_response(
+                request.user_id,
+                request.message,
+                request.mode
+            ),
             media_type="text/plain"
         )
 
