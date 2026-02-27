@@ -22,10 +22,13 @@ python -m app.main
 3) Index addition : 
 So as only one resume can be active at a time.
 docker exec -it ai_portfolio_postgres psql -U rohit -d ai_portfolio
-CREATE UNIQUE INDEX idx_one_active_resume
+
+1) CREATE UNIQUE INDEX idx_one_active_resume
 ON resumes ((1))
 WHERE is_active = true;
 
+2) CREATE UNIQUE INDEX users_username_lower_idx
+ON users (LOWER(username));
 
 
 4) pgVector Activation : 
