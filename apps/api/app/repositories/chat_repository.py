@@ -13,7 +13,7 @@ class ChatRepository:
 
     async def create_message(self, user_id: int, role: str, message: str, mode):
         try:
-            resume = self.resume_repo.get_active_resume()
+            resume = await self.resume_repo.get_active_resume()
             chat_message = ChatMessageModel(
                 user_id=user_id,
                 role=role,
@@ -35,7 +35,7 @@ class ChatRepository:
             )
             raise
 
-    async def get_recent_messages(self, user_id: int, limit: int = 10):
+    async def get_recent_messages(self, user_id: int, limit: int = 5):
         try:
             result = await self.session.execute(
                 select(ChatMessageModel)
@@ -45,7 +45,7 @@ class ChatRepository:
             )
             messages = result.scalars().all()
             logger.info(
-                f"get_recent_messages - user_id={user_id} - fetched successfully")
+                f"get_recent_messages - user_id={user_id} - fetched successfully - len={len(messages)}")
             return messages
         except Exception:
             logger.error(

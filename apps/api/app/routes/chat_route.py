@@ -1,4 +1,4 @@
-from warnings import deprecated
+from app.services.user_service import UserService
 from fastapi import Query
 from fastapi import APIRouter
 from pydantic import BaseModel
@@ -18,55 +18,23 @@ router = APIRouter(prefix="/chat", tags=["Chat"])
 class StreamChatRequest(BaseModel):
     user_id: int
     message: str = Field(..., min_length=1)
-    mode: UserMode
-# @deprecated
-# @router.post("/")
-# async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
-#     try:
-#         repo = ChatRepository(db)
-#         await repo.create_message("user", request.message)
-#         logger.info("chat - Chat message stored successfully")
-#         return {"response": "Message stored successfully"}
-#     except Exception as e:
-#         logger.error("chat - Error occurred while storing message", exc_info=True)
-#         raise
-# @router.get("/")
-# async def get_chat(db: AsyncSession = Depends(get_db)):
-#     try:
-#         repo = ChatRepository(db)
-#         messages = await repo.get_recent_messages()
-#         logger.info("get_chat - Chat messages fetched successfully")
-#         return {"messages": messages}
-#     except Exception as e:
-#         logger.error("get_chat - Error occurred", exc_info=True)
-#         raise
-# @router.post("/user")
-# async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
-#     try:
-#         chat_service = ChatService(db)
-#         reply = await chat_service.generate_response(request.message)
-#         logger.info("chat - Chat reply generated successfully")
-#         return {
-#             "response": reply
-#         }
-#     except Exception as e:
-#         logger.error(
-#             "chat - Error occurred while generating reply", exc_info=True)
-#         raise
 
 
 @router.post("/conversation")
-async def stream_chat(request: StreamChatRequest,
-                      mode: str = Query("candidate"),
-                      db: AsyncSession = Depends(get_db)
-                      ):
+async def stream_chat(
+    payload: StreamChatRequest,
+    db: AsyncSession = Depends(get_db)
+):
     try:
         chat_service = ChatService(db)
+        user_service = UserService(db)
+
+        user = await user_service.get_user_by_id(payload.user_id)
         response = StreamingResponse(
             chat_service.stream_response(
-                request.user_id,
-                request.message,
-                request.mode
+                payload.user_id,
+                payload.message,
+                user.mode
             ),
             media_type="text/plain"
         )
