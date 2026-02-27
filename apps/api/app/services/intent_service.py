@@ -6,6 +6,7 @@ from app.repositories.usage_repository import UsageRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.cache import cache
 from app.core.logger import logger
+import json
 
 
 class IntentService:
@@ -40,7 +41,7 @@ class IntentService:
                 return cached
 
             response = await self.client.chat.completions.create(
-            model=self.model,
+                model=self.model,
                 messages=[
                     {"role": "system", "content": "You classify user intents."},
                     {"role": "user", "content": prompt}
@@ -66,7 +67,10 @@ class IntentService:
 
             await self.usage_repo.usage_track(response, "intent-classification")
             try:
-                intent = response.choices[0].message.parsed["intent"]
+                intent_content = response.choices[0].message.content
+                parsed = json.loads(intent_content)
+                intent = parsed.get("intent", "")
+
                 cache.set(cache_key, intent)
 
                 logger.info("classify - Intent classified successfully")

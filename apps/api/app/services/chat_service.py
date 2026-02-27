@@ -116,6 +116,8 @@ class ChatService:
         try:
             intent = await self.intent_service.classify(user_message)
             if intent == "list_projects":
+                logger.info(
+                    "Intent matched with list_projects - Streaming response")
                 projects = await self._list_projects()
                 logger.info(
                     "stream_response - Projects list stream generated successfully")
