@@ -46,3 +46,14 @@ class UserService:
                 exc_info=True
             )
             raise
+
+    async def get_user_by_id(self, user_id: int):
+        try:
+            user = await self.repo.get_by_id(user_id)
+            return user
+        except Exception:
+            logger.error(
+                f"get_user_by_id service - user_id={user_id} error",
+                exc_info=True
+            )
+            raise

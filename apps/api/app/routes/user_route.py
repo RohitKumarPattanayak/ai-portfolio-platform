@@ -6,10 +6,10 @@ from app.core.logger import logger
 from app.models.schema.user_schema import UserMode, UserResponse, CreateUserRequest
 from app.services.user_service import UserService
 
-router = APIRouter(prefix="/user-create", tags=["user creation"])
+router = APIRouter(prefix="/user", tags=["user module"])
 
 
-@router.post("", response_model=UserResponse)
+@router.post("/create", response_model=UserResponse)
 async def create_user(request: CreateUserRequest, session: AsyncSession = Depends(get_db)):
     try:
         service = UserService(session)
@@ -33,23 +33,35 @@ async def create_user(request: CreateUserRequest, session: AsyncSession = Depend
 
 @router.patch("/mode", response_model=UserResponse)
 async def update_mode(
-    request: Request,
     user_id: int,
     mode: UserMode,
     session: AsyncSession = Depends(get_db)
 ):
     try:
         service = UserService(session)
-
         user = await service.update_mode(user_id, mode)
-
         logger.info("update_mode route - success")
-
         return user
-
     except ValueError as ve:
         raise HTTPException(status_code=404, detail=str(ve))
 
     except Exception:
         logger.error("update_mode route - error", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/get_user_by_id", response_model=UserResponse)
+async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_db)):
+    try:
+        service = UserService(session)
+        user = await service.get_user_by_id(user_id)
+        if user:
+            logger.info("user data fetched successfully")
+            return user
+        return {}
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+
+    except Exception:
+        logger.error("get_user_by_id route - error", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
