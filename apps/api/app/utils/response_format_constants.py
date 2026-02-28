@@ -66,3 +66,21 @@ PARSE_RESUME_RESPONSE_FORMAT = {
         }
     }
 }
+
+
+INTENT_CLASIFY_RESPONSE_FORMAT = {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "intent_classification",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "intent": {
+                    "type": "string",
+                    "enum": constants.SEGREGATION_ARR
+                }
+            },
+            "required": ["intent"]
+        }
+    }
+}

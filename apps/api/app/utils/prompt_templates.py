@@ -55,6 +55,21 @@ RESUME_PARSER_PROMPT_TEMP = Template("""
             ${raw_text}
             """)
 
+INTENT_PROMPT_TEMP = Template("""
+            Classify the user's intent.
+
+            Return ONLY valid JSON in this format:
+
+            {{
+            "intent": "list_projects | semantic_search | list_skills | list_experience | list_education"
+            }}
+
+            User message:
+            {message}
+            """)
+
+
 TEMPLATE_FACTORY = {
-    'resume_parser': RESUME_PARSER_PROMPT_TEMP
+    'resume_parser': RESUME_PARSER_PROMPT_TEMP,
+    'intent_clsify': INTENT_PROMPT_TEMP
 }
