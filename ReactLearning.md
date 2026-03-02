@@ -73,7 +73,6 @@ You should speak confidently about:
 
 
 
-
 CONCEPTS : 
 
 1) tanstack/react-query (Is replacement for use of useeffect->fetch->manual state management) 
@@ -81,7 +80,12 @@ CONCEPTS :
 https://www.youtube.com/watch?v=mPaCnwpFvZY
 https://youtu.be/e74rB-14-m8?si=kEJxjz69U_0TNByK    
 Documentation - https://tanstack.com/query/v5/docs/framework/react/reference/useMutation
-- useQuery , userSaveQuery , useQueries
+- useQuery 
+- userSaveQuery 
+- useQueries
+- useInfiniteQuery
+- userMutaion : is used to make update/create call to server where in useQuery is used for fetch calls
+
 
 2) zustund (Is a simple replacement for redux tools)
 - used for client state management and centralized store management 

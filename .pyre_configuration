@@ -1,0 +1,9 @@
+{
+  "venv": "apps/api/venv",
+  "source_directories": [
+    "apps/api"
+  ],
+  "search_path": [
+    "apps/api/venv/Lib/site-packages"
+  ]
+}
