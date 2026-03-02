@@ -14,3 +14,10 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class PaginatedUserResponse(BaseModel):
+    items: list[UserResponse]
+    total: int
+    offset: int | None
+    limit: int | None

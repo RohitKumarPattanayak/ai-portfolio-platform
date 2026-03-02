@@ -1,5 +1,6 @@
+from app.models.user_model import UserModel
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select
+from sqlalchemy import select, func
 from app.models.user_model import UserModel
 from app.core.logger import logger
 
@@ -78,4 +79,39 @@ class UserRepository:
 
         except Exception:
             logger.error("get_by_id - Error occurred", exc_info=True)
+            raise
+
+    async def get_all_users(self, params):
+        try:
+            offset = params.get("offset")
+            limit = params.get("limit", 1000)
+
+            stmt = (
+                select(
+                    UserModel,
+                    func.count().over().label("total_count")
+                )
+                .order_by(UserModel.username.asc())
+                .limit(limit)
+            )
+
+            # Add offset only if provided
+            if offset is not None:
+                stmt = stmt.offset(offset)
+
+            result = await self.session.execute(stmt)
+            rows = result.all()
+
+            if not rows:
+                return [], 0
+
+            users = [row[0] for row in rows]
+            total = rows[0][1]
+
+            return users, total
+
+        except Exception:
+            logger.error(
+                "get_all_users - Error occurred", exc_info=True
+            )
             raise

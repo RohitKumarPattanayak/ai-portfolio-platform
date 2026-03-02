@@ -57,3 +57,12 @@ class UserService:
                 exc_info=True
             )
             raise
+
+    async def get_all_users(self, params):
+        try:
+            users, total = await self.repo.get_all_users(params)
+            return users, total
+        except Exception:
+            logger.error(
+                "get_all_users service - error", exc_info=True)
+            raise

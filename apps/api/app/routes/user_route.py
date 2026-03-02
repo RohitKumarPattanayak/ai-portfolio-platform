@@ -1,9 +1,9 @@
-from fastapi import HTTPException, APIRouter, Depends, Request
+from fastapi import HTTPException, APIRouter, Depends, Query
 from app.core.logger import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.dependencies import get_db
 from app.core.logger import logger
-from app.models.schema.user_schema import UserMode, UserResponse, CreateUserRequest
+from app.models.schema.user_schema import UserMode, UserResponse, CreateUserRequest, PaginatedUserResponse
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="/user", tags=["user module"])
@@ -28,6 +28,32 @@ async def create_user(request: CreateUserRequest, session: AsyncSession = Depend
 
     except Exception:
         logger.error("create_user route - error", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/fetch_all_users")
+async def fetch_all_users(
+    offset: int | None = Query(default=None, ge=0),
+    limit: int | None = Query(default=None, ge=1),
+    session: AsyncSession = Depends(get_db)
+):
+    try:
+        service = UserService(session)
+        params = {
+            "offset": offset,
+            "limit": limit,
+        }
+        users, total = await service.get_all_users(params)
+        return PaginatedUserResponse(
+            items=users,
+            total=total,
+            offset=offset,
+            limit=limit
+        )
+    except HTTPException:
+        raise
+    except Exception:
+        logger.error("fetch_all_users route - error", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
