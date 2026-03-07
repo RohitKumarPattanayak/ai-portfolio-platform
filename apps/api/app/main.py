@@ -8,9 +8,29 @@ from app.routes import dashboard_route, chat_route, resume_route, health_route, 
 from fastapi.middleware.cors import CORSMiddleware
 from app.middleware.logging_middleware import LoggingMiddleware
 from app.core.logger import logger
+from contextlib import asynccontextmanager
+
+
+# startup code
+#    ↓
+# yield
+#    ↓
+# app runs
+#    ↓
+# shutdown code (after yield)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("startup - Database tables created successfully")
+        yield  # this is required for lifespan function so it could let it proceed like for the async context manager
+    except Exception as e:
+        logger.error("startup - Error occurred", exc_info=True)
+        raise
 
 load_dotenv()
-app = FastAPI(title="Rohit AI Portfolio API")
+app = FastAPI(title="Rohit AI Portfolio API", lifespan=lifespan)
 
 app.include_router(health_route.router)
 app.include_router(resume_route.router)
@@ -44,17 +64,16 @@ def root():
         logger.error("root - Error occurred", exc_info=True)
         raise
 
+# @app.on_event("startup")
+# async def startup():
+#     try:
+#         async with engine.begin() as conn:
+#             await conn.run_sync(Base.metadata.create_all)
 
-@app.on_event("startup")
-async def startup():
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-        logger.info("startup - Database tables created successfully")
-    except Exception as e:
-        logger.error("startup - Error occurred", exc_info=True)
-        raise
+#         logger.info("startup - Database tables created successfully")
+#     except Exception as e:
+#         logger.error("startup - Error occurred", exc_info=True)
+#         raise
 
 
 if __name__ == "__main__":
