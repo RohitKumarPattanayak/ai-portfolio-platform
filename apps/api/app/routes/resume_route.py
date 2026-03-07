@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -69,9 +69,15 @@ async def upload_resume(
 
 
 @router.get("/")
-async def list_resumes(db: AsyncSession = Depends(get_db)):
+async def list_resumes(
+    db: AsyncSession = Depends(get_db),
+    isActive: bool = Query(default=None, ge=False)
+):
     try:
-        result = await db.execute(select(ResumeModel))
+        if(isActive):
+            result = await db.execute(select(ResumeModel).where(ResumeModel.is_active == True))
+        else:
+            result = await db.execute(select(ResumeModel))
         resumes = result.scalars().all()
 
         logger.info("list_resumes - Resumes listed successfully")
