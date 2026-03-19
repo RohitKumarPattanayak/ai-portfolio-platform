@@ -204,7 +204,8 @@ class ChatService:
 
     async def stream_response(self, user_id: int, user_message: str, mode: str = "candidate"):
         try:
-            intent = await self.intent_service.classify(user_message)
+            # intent = await self.intent_service.classify(user_message)
+            intent = "others"
             if intent == "list_projects":
                 logger.info(
                     "Intent matched with list_projects - Streaming response")
@@ -344,3 +345,11 @@ class ChatService:
         except Exception:
             logger.error("summarize_history - Error occurred", exc_info=True)
             return ""
+
+    async def get_conversation(self, user_id: int):
+        try:
+            result = await self.chat_repo.get_recent_messages(user_id)
+            return result
+        except Exception as e:
+            logger.error("get_conversation - Error occurred", exc_info=True)
+            raise

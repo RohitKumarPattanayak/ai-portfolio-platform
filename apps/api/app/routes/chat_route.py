@@ -1,8 +1,5 @@
 from app.services.user_service import UserService
-from fastapi import Query
 from fastapi import APIRouter
-from pydantic import BaseModel
-from app.repositories.chat_repository import ChatRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from fastapi.responses import StreamingResponse
@@ -10,7 +7,6 @@ from app.core.dependencies import get_db
 from app.services.chat_service import ChatService
 from app.core.logger import logger
 from pydantic import BaseModel, Field
-from app.models.z_enums import UserMode
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
@@ -45,4 +41,18 @@ async def stream_chat(
         return response
     except Exception as e:
         logger.error("stream_chat - Error occurred", exc_info=True)
+        raise
+
+
+@router.get("/get-conversation/{user_id}")
+async def get_chat_conversation(
+    user_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        chat_service = ChatService(db)
+        conversation = await chat_service.get_conversation(user_id)
+        return conversation
+    except Exception as e:
+        logger.error("get_chat_conversation - Error occurred", exc_info=True)
         raise
