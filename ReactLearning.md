@@ -84,6 +84,8 @@ Documentation - https://tanstack.com/query/v5/docs/framework/react/reference/use
 - useQueries : is used to fetch multiple data from server
 - useInfiniteQuery : is used for pagination type fetch data from server
 - userMutaion : is used to make update/create call to server where in useQuery is used for fetch calls
+- useRef : is used to store mutable value that persists across renders but does not trigger re-renders *
+- useQueryClient : is used to access the query client instance *
 
 
 2) zustund (Is a simple replacement for redux tools)
