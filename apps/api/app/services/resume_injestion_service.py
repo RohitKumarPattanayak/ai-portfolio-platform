@@ -19,6 +19,8 @@ class ResumeIngestionService:
             structured_data = await self.parser_service.parse_resume(raw_text)
 
             sections = ["projects", "experience", "education", "skills"]
+            # introduction
+            # total_experiance
 
             for section in sections:
                 items = structured_data.get(section, [])

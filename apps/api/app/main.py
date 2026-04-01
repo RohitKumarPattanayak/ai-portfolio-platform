@@ -25,6 +25,9 @@ async def lifespan(app: FastAPI):
             await conn.run_sync(Base.metadata.create_all)
         logger.info("startup - Database tables created successfully")
         yield  # this is required for lifespan function so it could let it proceed like for the async context manager
+        # shutdown
+        await engine.dispose()
+        logger.info("shutdown - DB connection closed")
     except Exception as e:
         logger.error("startup - Error occurred", exc_info=True)
         raise

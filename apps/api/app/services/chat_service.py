@@ -205,51 +205,47 @@ class ChatService:
     async def stream_response(self, user_id: int, user_message: str, mode: str = "candidate"):
         try:
             # intent = await self.intent_service.classify(user_message)
-            intent = "others"
+            intent = user_message
             if intent == "list_projects":
                 logger.info(
                     "Intent matched with list_projects - Streaming response")
                 projects = await self._list_projects()
                 logger.info(
                     "stream_response - Projects list stream generated successfully")
-                yield str({
+                return {
                     "type": "projects_list",
                     "data": projects
-                })
-                return
+                }
             if intent == "list_experience":
                 logger.info(
                     "Intent matched with list_experience - Streaming response")
                 experience = await self._list_experience()
                 logger.info(
                     "stream_response - Experience list stream generated successfully")
-                yield str({
+                return {
                     "type": "experience_list",
                     "data": experience
-                })
-                return
+                }
             if intent == "list_education":
                 logger.info(
                     "Intent matched with list_education - Streaming response")
                 education = await self._list_education()
                 logger.info(
                     "stream_response - Education list stream generated successfully")
-                yield str({
+                return {
                     "type": "education_list",
                     "data": education
-                })
-                return
+                }
             if intent == "list_skills":
                 logger.info(
                     "Intent matched with list_skills - Streaming response")
                 skills = await self._list_skills()
                 logger.info(
                     "stream_response - Skills list stream generated successfully")
-                yield str({
+                return {
                     "type": "skills_list",
                     "data": skills
-                })
-                return
+                }
             history = await self.chat_repo.get_recent_messages(user_id)
             formatted_history = [
                 {"role": msg.role, "content": msg.message}
@@ -275,23 +271,24 @@ class ChatService:
                 "role": "user",
                 "content": user_message
             })
-            stream = await self.client.chat.completions.create(
+            openAiResponse = await self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
-                temperature=0.3,
-                stream=True
+                temperature=0,
             )
-            await self.usage_repo.usage_track(stream, "stream-response")
+            api_response = openAiResponse.choices[0].message.content
+
+            await self.usage_repo.usage_track(openAiResponse, "stream-response")
+            
             logger.info(
                 "stream_response - Streaming response created successfully")
-            full_response = ""
-            async for chunk in stream:
-                if chunk.choices[0].delta.content:
-                    token = chunk.choices[0].delta.content
-                    full_response += token
-                    yield token
+
             await self.chat_repo.create_message(user_id, "user", user_message, mode)
-            await self.chat_repo.create_message(user_id, "assistant", full_response, mode)
+            await self.chat_repo.create_message(user_id, "assistant", api_response, mode)
+            return {
+                "type" : "llm",
+                "data" : api_response
+            }
         except Exception as e:
             logger.error("stream_response - Error occurred", exc_info=True)
             raise

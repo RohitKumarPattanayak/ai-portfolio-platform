@@ -26,14 +26,11 @@ async def stream_chat(
         user_service = UserService(db)
 
         user = await user_service.get_user_by_id(payload.user_id)
-        response = StreamingResponse(
-            chat_service.stream_response(
+        response = await chat_service.stream_response(
                 payload.user_id,
                 payload.message,
                 user.mode
-            ),
-            media_type="text/plain"
-        )
+            )
 
         logger.info(
             "stream_chat - Streaming chat response started successfully")
