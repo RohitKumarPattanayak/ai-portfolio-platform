@@ -1,12 +1,18 @@
 import re
+
 # Filename: constants.py
+
+# Added new sections for intent segregation
 SEGREGATION_ARR = [
+    "introduction",
+    "total_experience",
     "list_projects",
     "list_skills",
     "list_experience",
     "list_education",
     "semantic_search"
 ]
+
 PARSE_SECTION_PROJECT = [
     "title",
     "company",
@@ -14,6 +20,7 @@ PARSE_SECTION_PROJECT = [
     "description",
     "impact"
 ]
+
 PARSE_SECTION_EXPERIANCE = [
     "company",
     "role",
@@ -21,21 +28,35 @@ PARSE_SECTION_EXPERIANCE = [
     "end_date",
     "description"
 ]
+
 PARSE_SECTION_EDUCATION = [
     "institution",
     "degree",
     "start_year",
     "end_year"
 ]
+
+# Updated Intents to include Introduction and Total Experience
 INTENTS = {
+    "introduction": "User asking for an overview or introduction of the candidate",
     "total_experience": "User asking about total years of professional experience",
-    "list_experience": "User asking about past companies or work history or past experiance",
+    "list_experience": "User asking about past companies or work history or past experience",
     "list_skills": "User asking about technical skills or technologies",
     "list_education": "User asking about education background",
     "list_projects": "User asking about listing all projects",
 }
 
 _INTENT_PATTERNS = {
+    # New pattern for introduction/summary
+    "introduction": re.compile(
+        r"\bwho\s+is\b|"
+        r"\btell\s+me\s+about\b|"
+        r"\bsummarize\b|"
+        r"\bintroduction\b|"
+        r"\boverview\b|"
+        r"\bbrief\b"
+    ),
+
     "total_experience": re.compile(
         r"\b(total|overall)\s+(work\s+)?experien[cs]e\b|"
         r"\b(total|overall)\s+(work\s+)?experiance\b|"
@@ -87,4 +108,12 @@ _INTENT_PATTERNS = {
     ),
 }
 
-RESUME_INJESTION_SECTIONS = ["projects", "experience", "education", "skills", "introduction", "total_experience"]
+# Ensure the ingestion list matches the parser output
+RESUME_INJESTION_SECTIONS = [
+    "introduction", 
+    "total_experience", 
+    "projects", 
+    "experience", 
+    "education", 
+    "skills"
+]

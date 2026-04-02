@@ -162,8 +162,6 @@ class ChatService:
             active_resume = await repo.get_active_resume()
 
             if not active_resume:
-                logger.info(
-                    "_list_skills - No active resume found, returning message - success")
                 return "No active resume found."
 
             result = await self.session.execute(
@@ -174,74 +172,154 @@ class ChatService:
                 )
             )
 
-            skill_chunks = result.scalars().all()
+            # Get the first chunk since skills are stored as one comma-separated block
+            chunk = result.scalars().first()
 
-            if not skill_chunks:
-                logger.info(
-                    "_list_skills - No skills found, returning message - success")
+            if not chunk:
+                logger.info("_list_skills - No skills found")
                 return "No skills found."
 
-            # Skills can be stored as string in meta_data or as dict; normalize to list of skill strings
-            skills_data = []
-            for s in skill_chunks:
-                meta = s.meta_data
-                if isinstance(meta, str) and meta.strip():
-                    skills_data.append({"id": s.id, "skill": meta.strip()})
-                elif isinstance(meta, dict) and meta.get("skill"):
-                    skills_data.append({"id": s.id, "skill": meta["skill"]})
-                elif isinstance(meta, dict) and meta.get("name"):
-                    skills_data.append({"id": s.id, "skill": meta["name"]})
+            meta = chunk.meta_data
+            raw_skills = ""
 
-            if not skills_data:
+            # Extract the raw string from various possible formats
+            if isinstance(meta, dict):
+                raw_skills = meta.get("skills") or meta.get("skill") or meta.get("name") or ""
+            elif isinstance(meta, str):
+                raw_skills = meta
+
+            if not raw_skills:
                 return "No skills found."
 
-            logger.info("_list_skills - Skills listed successfully")
+            # Split comma-separated string into a list of objects
+            # e.g., "Python, Java" -> [{"id": ..., "content": "Python"}, {"id": ..., "content": "Java"}]
+            skills_data = [
+                {"id": f"{chunk.id}_{i}", "content": s.strip()}
+                for i, s in enumerate(raw_skills.split(","))
+                if s.strip()
+            ]
 
+            logger.info("_list_skills - Skills split and listed successfully")
             return skills_data
+
         except Exception as e:
             logger.error("_list_skills - Error occurred", exc_info=True)
+            raise
+        
+    async def _get_introduction(self):
+        try:
+            repo = ResumeRepository(self.session)
+            active_resume = await repo.get_active_resume()
+
+            if not active_resume:
+                return "No active resume found."
+
+            result = await self.session.execute(
+                select(ResumeChunkModel)
+                .where(
+                    ResumeChunkModel.resume_id == active_resume.id,
+                    ResumeChunkModel.section == "introduction"
+                )
+            )
+
+            chunk = result.scalars().first()
+            if not chunk:
+                return "No introduction found."
+
+            meta = chunk.meta_data
+            # Extract from dict {"introduction": "..."}
+            if isinstance(meta, dict) and meta.get("introduction"):
+                return meta["introduction"]
+            
+            return chunk.content # Fallback to raw content
+        except Exception as e:
+            logger.error("_get_introduction - Error occurred", exc_info=True)
+            raise
+
+    async def _get_total_experience(self):
+        try:
+            repo = ResumeRepository(self.session)
+            active_resume = await repo.get_active_resume()
+
+            if not active_resume:
+                return "No active resume found."
+
+            result = await self.session.execute(
+                select(ResumeChunkModel)
+                .where(
+                    ResumeChunkModel.resume_id == active_resume.id,
+                    ResumeChunkModel.section == "total_experience"
+                )
+            )
+
+            chunk = result.scalars().first()
+            if not chunk:
+                return "Total experience information not available."
+
+            meta = chunk.meta_data
+            # Extract from dict {"total_experience": "..."}
+            if isinstance(meta, dict) and meta.get("total_experience"):
+                return meta["total_experience"]
+                
+            return chunk.content # Fallback
+        except Exception as e:
+            logger.error("_get_total_experience - Error occurred", exc_info=True)
             raise
 
     async def stream_response(self, user_id: int, user_message: str, mode: str = "candidate"):
         try:
             # intent = await self.intent_service.classify(user_message)
             intent = user_message
-            if intent == "list_projects":
-                logger.info(
-                    "Intent matched with list_projects - Streaming response")
+
+            if intent == "introduction":
+                logger.info("Intent matched with introduction - Streaming response")
+                intro = await self._get_introduction()
+                logger.info("stream_response - Introduction stream generated successfully")
+                return {
+                    "type": "introduction",
+                    "data": intro
+                }
+
+            elif intent == "total_experience":
+                logger.info("Intent matched with total_experience - Streaming response")
+                total_exp = await self._get_total_experience()
+                logger.info("stream_response - Total experience stream generated successfully")
+                return {
+                    "type": "total_experience",
+                    "data": total_exp
+                }
+
+            elif intent == "list_projects":
+                logger.info("Intent matched with list_projects - Streaming response")
                 projects = await self._list_projects()
-                logger.info(
-                    "stream_response - Projects list stream generated successfully")
+                logger.info("stream_response - Projects list stream generated successfully")
                 return {
                     "type": "projects_list",
                     "data": projects
                 }
-            if intent == "list_experience":
-                logger.info(
-                    "Intent matched with list_experience - Streaming response")
+
+            elif intent == "list_experience":
+                logger.info("Intent matched with list_experience - Streaming response")
                 experience = await self._list_experience()
-                logger.info(
-                    "stream_response - Experience list stream generated successfully")
+                logger.info("stream_response - Experience list stream generated successfully")
                 return {
                     "type": "experience_list",
                     "data": experience
                 }
-            if intent == "list_education":
-                logger.info(
-                    "Intent matched with list_education - Streaming response")
+
+            elif intent == "list_education":
+                logger.info("Intent matched with list_education - Streaming response")
                 education = await self._list_education()
-                logger.info(
-                    "stream_response - Education list stream generated successfully")
+                logger.info("stream_response - Education list stream generated successfully")
                 return {
                     "type": "education_list",
                     "data": education
                 }
-            if intent == "list_skills":
-                logger.info(
-                    "Intent matched with list_skills - Streaming response")
+
+            elif intent == "list_skills":
+                logger.info("Intent matched with list_skills - Streaming response")
                 skills = await self._list_skills()
-                logger.info(
-                    "stream_response - Skills list stream generated successfully")
+                logger.info("stream_response - Skills list stream generated successfully")
                 return {
                     "type": "skills_list",
                     "data": skills
