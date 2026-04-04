@@ -12,9 +12,10 @@ export const streamChatConversation = async (
 };
 export interface ChatMessage {
     id: number;
-    message: string;
+    message: any;
     role: string;
     mode: string;
+    content_type: string;
     user_id: number;
     resume_id: number;
     created_at: string;

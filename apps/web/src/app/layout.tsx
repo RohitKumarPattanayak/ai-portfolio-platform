@@ -10,7 +10,7 @@ const DashboardLayout = () => {
   const location = useLocation()
 
   // Theme state
-  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
   // Sidebar state
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)

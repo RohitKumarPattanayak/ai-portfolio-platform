@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { getChatConversation, streamChatConversation } from "../services/chat.service"
 
 const chatMutations = {
-  getChatResponse: (options = {}) => ({
+  postChatResponse: (options = {}) => ({
     mutationKey: ["chat-response"],
     mutationFn: streamChatConversation,
     ...options
@@ -18,7 +18,7 @@ const chatQueries = {
 }
 
 export const chatResponseMutation = () => {
-  return useMutation(chatMutations.getChatResponse())
+  return useMutation(chatMutations.postChatResponse())
 } 
 
 export const getChatConversationQuery = (userId: number) => {
