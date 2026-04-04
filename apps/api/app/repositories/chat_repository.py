@@ -66,8 +66,12 @@ class ChatRepository:
                 f"get_recent_messages - user_id={user_id} - fetched successfully - len={len(messages)}")
             
             for msg in messages:
-                if msg.role != 'user':
-                    msg.message = ast.literal_eval(msg.message)
+                if msg.role != 'user' and msg.content_type != 'text':
+                    try:
+                        self.session.expunge(msg)
+                        msg.message = ast.literal_eval(msg.message)
+                    except Exception:
+                        pass
             return messages
         except Exception:
             logger.error(

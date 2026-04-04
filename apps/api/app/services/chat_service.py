@@ -4,6 +4,7 @@ from app.repositories.resume_repository import ResumeRepository
 from app.models.resume_chunk_model import ResumeChunkModel
 from sqlalchemy import select
 from openai import AsyncOpenAI
+import json
 import os
 from app.repositories.chat_repository import ChatRepository
 from app.services.intent_service import IntentService
@@ -24,7 +25,41 @@ class ChatService:
         self.intent_service = IntentService(session)
         self.usage_repo = UsageRepository(session)
         self.chat_repo = ChatRepository(session)
+    
+    def _normalize_content(self, content):
+        import json
 
+        if isinstance(content, (list, dict)):
+            return json.dumps(content)
+
+        return content
+
+    def _build_messages(self, mode, context_text, formatted_history, user_message):
+
+        messages = [
+            {
+                "role": "system",
+                "content": self._get_system_prompt(mode)
+            },
+            {
+                "role": "system",
+                "content": f"Relevant Resume Context:\n{context_text}"
+            }
+        ]
+
+        for msg in formatted_history:
+            messages.append({
+                "role": msg["role"],
+                "content": self._normalize_content(msg["content"])
+            })
+
+        messages.append({
+            "role": "user",
+            "content": user_message
+        })
+
+        return messages
+    
     async def _list_projects(self):
         try:
             repo = ResumeRepository(self.session)
@@ -341,26 +376,13 @@ class ChatService:
             # summary = await self.summarize_history(formatted_history)
             relevant_chunks = await self.vector_service.search(user_message)
             context_text = "\n\n".join(relevant_chunks)
-            messages = [
-                {
-                    "role": "system",
-                    "content": self._get_system_prompt(mode)
-                },
-                {
-                    "role": "system",
-                    "content": f"Relevant Resume Context:\n{context_text}"
-                }
-            ]
-            messages.extend(formatted_history)
-            messages.append({
-                "role": "user",
-                "content": user_message
-            })
+            messages = self._build_messages(mode, context_text, formatted_history, user_message)
             openAiResponse = await self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 temperature=0,
             )
+
             api_response = openAiResponse.choices[0].message.content
 
             await self.usage_repo.usage_track(openAiResponse, "stream-response")

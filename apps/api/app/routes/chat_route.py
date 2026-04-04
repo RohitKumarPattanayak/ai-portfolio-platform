@@ -24,7 +24,6 @@ async def stream_chat(
     try:
         chat_service = ChatService(db)
         user_service = UserService(db)
-
         user = await user_service.get_user_by_id(payload.user_id)
         response = await chat_service.stream_response(
                 payload.user_id,
