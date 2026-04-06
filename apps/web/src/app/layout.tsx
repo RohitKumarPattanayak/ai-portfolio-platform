@@ -73,14 +73,14 @@ const DashboardLayout = () => {
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm z-20 transition-opacity"
+          className="md:hidden fixed inset-0 bg-black/20 dark:bg-black/60  z-20 transition-opacity"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar - Heavily Glassmorphic & Responsive */}
       <aside
-        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white/70 dark:border-white/[0.04] dark:bg-black/40 backdrop-blur-3xl flex flex-col items-center py-8 pb-6 z-30 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:hidden"
+        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white/70 dark:border-white/[0.04] dark:bg-black/40 flex flex-col items-center py-8 pb-6 z-30 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:hidden"
           }`}
       >
         <div className="mb-10 px-6 w-full flex items-center justify-between gap-4">
@@ -165,7 +165,7 @@ const DashboardLayout = () => {
         <div className="absolute top-4 left-4 z-50 flex items-center">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2.5 bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 backdrop-blur-md border border-gray-200 dark:border-white/[0.08] text-gray-800 dark:text-white rounded-xl shadow-sm dark:shadow-lg transition-all group"
+            className="p-2.5 bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 border border-gray-200 dark:border-white/[0.08] text-gray-800 dark:text-white rounded-xl shadow-sm dark:shadow-lg transition-all group"
           >
             <Menu size={20} className="text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
           </button>

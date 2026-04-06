@@ -7,7 +7,7 @@ interface Props {
 
 export const LoadingFallback = ({ fullScreen = true, message = "Loading Interface..." }: Props) => {
   return (
-    <div className={`flex flex-col items-center justify-center ${fullScreen ? "h-screen w-full" : "h-full w-full min-h-[300px]"} bg-slate-50/50 dark:bg-[#030303]/50 backdrop-blur-sm`}>
+    <div className={`flex flex-col items-center justify-center ${fullScreen ? "h-screen w-full" : "h-full w-full min-h-[300px]"} bg-slate-50/50 dark:bg-[#030303]/50 `}>
       <div className="flex flex-col items-center gap-4 animate-in fade-in zoom-in duration-700">
         <div className="relative">
           <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 rounded-full" />

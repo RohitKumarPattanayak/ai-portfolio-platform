@@ -120,7 +120,7 @@ export const ChatPage = () => {
                                     </div>
                                 ) : (
                                     <div className="relative pl-6 mb-8 before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-gradient-to-b before:from-indigo-300 dark:before:from-indigo-500/50 before:to-transparent">
-                                        <div className="p-6 rounded-3xl border transition-all duration-500 overflow-hidden relative bg-white/80 dark:bg-[#0a0a0c]/80 backdrop-blur-md border-gray-200 dark:border-white/[0.06] shadow-xl dark:shadow-2xl hover:border-gray-300 dark:hover:border-white/[0.1] hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/5">
+                                        <div className="p-6 rounded-3xl border transition-all duration-500 overflow-hidden relative bg-white/80 dark:bg-[#0a0a0c]/80 border-gray-200 dark:border-white/[0.06] shadow-xl dark:shadow-2xl hover:border-gray-300 dark:hover:border-white/[0.1] hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/5">
                                             <div className="text-[15px] leading-relaxed text-gray-700 dark:text-gray-200 tracking-wide [&>p]:mb-4 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-4 [&>li]:mb-1 [&_strong]:text-gray-900 [&_strong]:dark:text-white [&_code]:bg-gray-100 [&_code]:dark:bg-white/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&>pre]:bg-gray-800 [&>pre]:text-gray-100 [&>pre]:p-4 [&>pre]:rounded-xl [&>pre]:overflow-x-auto [&>pre]:mb-4">
                                                 {msg.content_type == 'text' &&
                                                     <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading markup response..." />}>
@@ -196,7 +196,7 @@ export const ChatPage = () => {
                     {/* Outer glow */}
                     <div className="absolute -inset-1 bg-gradient-to-r from-indigo-300 dark:from-indigo-500 to-emerald-300 dark:to-emerald-500 rounded-[2rem] blur opacity-30 dark:opacity-20 group-hover:opacity-60 dark:group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
 
-                    <div className="relative flex items-center bg-white/90 dark:bg-black/80 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2rem] shadow-2xl overflow-hidden transition-all duration-300 focus-within:bg-white dark:focus-within:bg-black/90 focus-within:border-indigo-300 dark:focus-within:border-white/20 focus-within:ring-2 dark:focus-within:ring-1 focus-within:ring-indigo-500/50">
+                    <div className="relative flex items-center bg-white/90 dark:bg-black/80 border border-gray-200 dark:border-white/10 rounded-[2rem] shadow-2xl overflow-hidden transition-all duration-300 focus-within:bg-white dark:focus-within:bg-black/90 focus-within:border-indigo-300 dark:focus-within:border-white/20 focus-within:ring-2 dark:focus-within:ring-1 focus-within:ring-indigo-500/50">
                         <div className="pl-6 pr-3 flex items-center text-indigo-500 dark:text-indigo-400">
                             <Terminal size={18} />
                         </div>

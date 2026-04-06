@@ -5,7 +5,7 @@ const EmptyState = memo(({ onCommandClick }: { onCommandClick: (text: string) =>
     <div className="flex flex-col items-center justify-center h-full px-6 text-center animate-in fade-in duration-700">
         <div className="relative mb-8">
             <div className="absolute inset-0 bg-indigo-200 dark:bg-indigo-500 blur-3xl opacity-40 dark:opacity-20 rounded-full" />
-            <div className="h-24 w-24 rounded-3xl bg-white/50 dark:bg-gradient-to-b dark:from-white/10 dark:to-white/5 border border-indigo-100 dark:border-white/10 backdrop-blur-xl flex items-center justify-center shadow-xl dark:shadow-2xl relative">
+            <div className="h-24 w-24 rounded-3xl bg-white/50 dark:bg-gradient-to-b dark:from-white/10 dark:to-white/5 border border-indigo-100 dark:border-white/10 flex items-center justify-center shadow-xl dark:shadow-2xl relative">
                 <Terminal size={40} className="text-indigo-600 dark:text-indigo-400" strokeWidth={1.5} />
             </div>
         </div>
