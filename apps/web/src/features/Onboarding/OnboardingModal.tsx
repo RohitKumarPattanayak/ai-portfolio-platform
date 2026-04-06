@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useUserStore } from "../../store/user.store"
 import { useNavigate } from "react-router-dom"
-import { onboardingCreateUser, onboardingFetchAllUsersInfinite, onboardingUpdateUser, onboardingFetchActiveResume } from '../../react-queries/OnboardingQueries'
+import { onboardingCreateUser, onboardingFetchAllUsersInfinite, onboardingLoginUser, onboardingFetchActiveResume, onboardingGetLoggedUser } from '../../react-queries/OnboardingQueries'
 import TypingHeading from "../../components/shared/onboarding/TypeHeading"
 
 type UserMode = "recruiter" | "candidate"
@@ -138,13 +138,23 @@ const OnboardingModal = () => {
   const navigate = useNavigate()
 
   const { mutateAsync: createMutation, isPending: isCreatePending, isError: isCreateError, error: createError } = onboardingCreateUser()
-  const { mutateAsync: updateMutation, isPending: isUpdatePending, isError: isUpdateError, error: updateError } = onboardingUpdateUser()
+  const { mutateAsync: updateMutation, isPending: isUpdatePending, isError: isUpdateError, error: updateError } = onboardingLoginUser()
+  const { data: loggedUser } = onboardingGetLoggedUser()
+
+  useEffect(() => {
+    if (!loggedUser) return
+
+    setUser(loggedUser.id, loggedUser.username, loggedUser.mode)
+    navigate("/dashboard/chat")
+
+  }, [loggedUser])
 
   // Since we fetch users directly, handleLogin just sets the store state locally.
   const handleLogin = useCallback(async () => {
     if (!username.trim()) return
     if (!selectedUser) return
     const user = await updateMutation({ user_id: selectedUser.id, mode }) as UserItem
+
     setUser(user.id, user.username, user.mode)
     navigate("/dashboard/chat")
   }, [mode, navigate, selectedUser, setUser, updateMutation, username])

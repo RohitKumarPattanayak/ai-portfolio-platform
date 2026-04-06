@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useInfiniteQuery } from "@tanstack/react-query"
-import { createUser , fetchAllUser, updateUser } from "../services/user.service"
+import { createUser , fetchAllUser, getLoggedUser, loginUser } from "../services/user.service"
 import { getResumes } from "../services/resume.service"
 
 
@@ -8,16 +8,22 @@ const onboardingMutations = {
     mutationFn: createUser,
     ...options,
   }),
-  updateUser: (options = {}) => ({
-    mutationFn: updateUser,
+  loginUser: (options = {}) => ({
+    mutationFn: loginUser,
     ...options,
-  }),
+  })
 }
 
 const onboardingUseQuery = {
     fetchAllUsers: (options = {}) => ({
       queryKey: ['fetch-users'],
       queryFn: fetchAllUser,
+      ...options
+    }),
+    getLoggedUser: (options = {}) => ({
+      queryKey: ['fetch-logged-user'],
+      queryFn: getLoggedUser,
+      retry: false,
       ...options
     }),
     getActiveResume: (options = {}) => ({
@@ -56,11 +62,11 @@ export const onboardingCreateUser = () => {
   )
 }
 
-export const onboardingUpdateUser = () => {
-  return useMutation(onboardingMutations.updateUser(
+export const onboardingLoginUser = () => {
+  return useMutation(onboardingMutations.loginUser(
     {
       onSuccess: () => {
-        console.log("User updated successfully")
+        console.log("User logged in successfully")
       },
       onError: () => {
         console.log("User updation failed ")
@@ -80,3 +86,7 @@ export const onboardingFetchAllUsersInfinite = (search = "", limit = 10) => {
 export const onboardingFetchActiveResume = () => {
   return useQuery(onboardingUseQuery.getActiveResume())
 } 
+
+export const onboardingGetLoggedUser = () => {
+  return useQuery(onboardingUseQuery.getLoggedUser())
+}
