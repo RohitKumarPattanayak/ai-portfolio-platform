@@ -9,8 +9,27 @@ from app.services.user_service import UserService
 router = APIRouter(prefix="/user", tags=["user module"])
 
 
+def authenticate_set_cookie(user, res: Response):
+    jwt_service = JwtService()
+
+    jwt_payload = {
+        "id": user.id,
+        "username": user.username,
+        "mode": user.mode.value
+    }
+
+    access_token = jwt_service.create_access_token(jwt_payload)
+    refresh_token = jwt_service.create_refresh_token(jwt_payload)
+
+    res.set_cookie("_P_jwt_access", access_token, httponly=True)
+    res.set_cookie("_P_jwt_refresh", refresh_token, httponly=True)
+
 @router.post("/create", response_model=UserResponse)
-async def create_user(request: CreateUserRequest, session: AsyncSession = Depends(get_db_write)):
+async def create_user(
+    request: CreateUserRequest,
+    res: Response,
+    session: AsyncSession = Depends(get_db_write)
+):
     try:
         service = UserService(session)
 
@@ -18,6 +37,8 @@ async def create_user(request: CreateUserRequest, session: AsyncSession = Depend
             username=request.username.lower(),
             mode=request.mode
         )
+
+        authenticate_set_cookie(user, res)
 
         logger.info("create_user route - success")
 
@@ -70,21 +91,7 @@ async def login_user(
         service = UserService(session)
         user = await service.update_mode(user_id, mode)
 
-        # generate jwt token
-        jwt_service = JwtService()
-
-        jwt_payload = {
-            "id": user.id,
-            "username": user.username,
-            "mode": user.mode.value
-        }
-
-        access_token = jwt_service.create_access_token(jwt_payload)
-        refresh_token = jwt_service.create_refresh_token(jwt_payload)
-
-        # set cookie
-        res.set_cookie("_P_jwt_access", access_token, httponly=True)
-        res.set_cookie("_P_jwt_refresh", refresh_token, httponly=True)
+        authenticate_set_cookie(user, res)
 
         logger.info("login route - success")
         return user
