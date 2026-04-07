@@ -1,7 +1,9 @@
-# AI Portfolio
+## AI-Powered Interactive Portfolio Platform
 
 ## 📖 Overview
-An AI-powered professional portfolio and interactive resume. The system is generation-driven—by simply injecting a raw resume (parsed via PyPDF/Python-Docx and GPT for structured data extraction), it automatically generates a fully functional, UI-integrated portfolio and an interactive bot representing my professional background. The application features a conversational interface that enables users and recruiters to query my experience, projects, and skills dynamically. Underlying this is a Retrieval-Augmented Generation (RAG) pipeline that fetches relevant context from the parsed resume and streams intelligent, context-aware responses.
+An AI-driven portfolio platform that automatically transforms a raw resume into a dynamic, interactive developer profile. The system parses structured data from resumes (PDF/DOCX) and generates a fully integrated portfolio UI with an embedded conversational assistant that allows recruiters and visitors to explore experience, projects, and technical skills through natural language queries.
+
+The platform leverages a Retrieval-Augmented Generation (RAG) pipeline to retrieve relevant professional context and produce accurate, context-aware responses in real time. The architecture combines modern frontend frameworks with a scalable backend and vector-based semantic search to deliver an intelligent, conversational representation of a developer’s professional background.
 
 ## 🛠️ Technologies & Stack Used
 
