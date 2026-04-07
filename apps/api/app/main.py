@@ -3,13 +3,15 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 import uvicorn
 import os
-from app.core.database import engine, Base
+from app.core.database import Base, primary_engine, replica_engine
 from app.routes import dashboard_route, chat_route, resume_route, health_route, analytics_route, test_route, user_route
 from fastapi.middleware.cors import CORSMiddleware
 from app.middleware.logging_middleware import LoggingMiddleware
 from app.core.logger import logger
 from contextlib import asynccontextmanager
 
+
+from sqlalchemy import text
 
 # startup code
 #    ↓
@@ -21,12 +23,15 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        async with engine.begin() as conn:
+        async with primary_engine.begin() as conn:
+            # the below is for activating pgvector extension in postgres
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
             await conn.run_sync(Base.metadata.create_all)
         logger.info("startup - Database tables created successfully")
         yield  # this is required for lifespan function so it could let it proceed like for the async context manager
         # shutdown
-        await engine.dispose()
+        await primary_engine.dispose()
+        await replica_engine.dispose()
         logger.info("shutdown - DB connection closed")
     except Exception as e:
         logger.error("startup - Error occurred", exc_info=True)

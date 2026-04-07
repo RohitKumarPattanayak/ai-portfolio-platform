@@ -1,17 +1,80 @@
 version: "3.9"
 
+networks:
+  db_network:
+    driver: bridge
+
 services:
-  postgres:
+
+  postgres-primary:
     image: ankane/pgvector
-    container_name: ai_portfolio_postgres
+    container_name: ai_portfolio_postgres_primary
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - primary_data:/var/lib/postgresql/data
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
+    networks:
+      - db_network
+    command: >
+      postgres
+        -c wal_level=replica
+        -c max_wal_senders=10
+        -c max_replication_slots=10
+        -c hot_standby=on
+        -c listen_addresses='*'
+        -c hba_file=/etc/postgresql/pg_hba.conf
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-replica:
+    image: ankane/pgvector
+    container_name: ai_portfolio_postgres_replica
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    volumes:
+      - replica_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+    entrypoint: >
+      bash -c "
+      until pg_isready -h postgres-primary -p 5432 -U ${POSTGRES_USER}; do
+        echo 'Waiting for primary...'
+        sleep 2
+      done
+
+      sleep 5
+
+      if [ ! -s /var/lib/postgresql/data/PG_VERSION ]; then
+        echo 'Taking base backup...'
+        pg_basebackup -h postgres-primary -D /var/lib/postgresql/data -U ${POSTGRES_USER} -vP --wal-method=stream -R
+      fi
+
+      exec docker-entrypoint.sh postgres -c hot_standby=on
+      "
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "postgres", "-U", "${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  postgres_data:
+  primary_data:
+  replica_data:
