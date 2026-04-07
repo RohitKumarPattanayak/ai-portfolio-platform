@@ -4,7 +4,7 @@ from sqlalchemy import select
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Any, Union
 
-from app.core.dependencies import get_db
+from app.core.dependencies import get_db_read, get_db_write
 from app.services.resume_injestion_service import ResumeIngestionService
 from app.repositories.resume_repository import ResumeRepository
 from app.models.resume_model import ResumeModel
@@ -50,7 +50,7 @@ class InjectManualDataRequest(BaseModel):
 async def upload_resume(
     name: str = Form(...),
     file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_write)
 ):
     try:
         RIservice = ResumeIngestionService(db)
@@ -70,7 +70,7 @@ async def upload_resume(
 
 @router.get("/")
 async def list_resumes(
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_read),
     isActive: bool = Query(default=None, ge=False)
 ):
     try:
@@ -96,7 +96,7 @@ async def list_resumes(
 
 
 @router.post("/activate/{resume_id}")
-async def activate_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
+async def activate_resume(resume_id: int, db: AsyncSession = Depends(get_db_write)):
     try:
         repo = ResumeRepository(db)
         await repo.switch_active_resume(resume_id)
@@ -112,7 +112,7 @@ async def activate_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
 @router.post("/inject_manual_data")
 async def inject_manual_data(
     body: InjectManualDataRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_write)
 ):
     try:
         resume_result = await db.execute(
@@ -148,7 +148,7 @@ async def inject_manual_data(
 
 
 @router.delete("/{resume_id}")
-async def delete_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_resume(resume_id: int, db: AsyncSession = Depends(get_db_write)):
     try:
         repo = ResumeRepository(db)
         await repo.delete_resume(resume_id)

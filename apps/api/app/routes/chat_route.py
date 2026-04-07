@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from fastapi.responses import StreamingResponse
-from app.core.dependencies import get_db
+from app.core.dependencies import get_db_read, get_db_write
 from app.services.chat_service import ChatService
 from app.core.logger import logger
 from pydantic import BaseModel, Field
@@ -19,7 +19,7 @@ class StreamChatRequest(BaseModel):
 @router.post("/conversation")
 async def stream_chat(
     payload: StreamChatRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_write)
 ):
     try:
         chat_service = ChatService(db)
@@ -43,7 +43,7 @@ async def stream_chat(
 @router.get("/get-conversation/{user_id}")
 async def get_chat_conversation(
     user_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_read)
 ):
     try:
         chat_service = ChatService(db)

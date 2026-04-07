@@ -1,8 +1,8 @@
-from fastapi import HTTPException, APIRouter, Depends, Query
+from app.services.jwt_service import JwtService
+from fastapi import HTTPException, APIRouter, Depends, Query, Response, Request
 from app.core.logger import logger
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.dependencies import get_db
-from app.core.logger import logger
+from app.core.dependencies import get_db_read, get_db_write
 from app.models.schema.user_schema import UserMode, UserResponse, CreateUserRequest, PaginatedUserResponse
 from app.services.user_service import UserService
 
@@ -10,7 +10,7 @@ router = APIRouter(prefix="/user", tags=["user module"])
 
 
 @router.post("/create", response_model=UserResponse)
-async def create_user(request: CreateUserRequest, session: AsyncSession = Depends(get_db)):
+async def create_user(request: CreateUserRequest, session: AsyncSession = Depends(get_db_write)):
     try:
         service = UserService(session)
 
@@ -36,7 +36,7 @@ async def fetch_all_users(
     offset: int | None = Query(default=None, ge=0),
     limit: int | None = Query(default=None, ge=1),
     search: str | None = Query(default=None),
-    session: AsyncSession = Depends(get_db)
+    session: AsyncSession = Depends(get_db_read)
 ):
     try:
         service = UserService(session)
@@ -59,18 +59,37 @@ async def fetch_all_users(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.patch("/mode", response_model=UserResponse)
-async def update_mode(
+@router.patch("/login", response_model=UserResponse)
+async def login_user(
     user_id: int,
     mode: UserMode,
-    session: AsyncSession = Depends(get_db)
+    res: Response,
+    session: AsyncSession = Depends(get_db_write),
 ):
     try:
         service = UserService(session)
         user = await service.update_mode(user_id, mode)
-        logger.info("update_mode route - success")
+
+        # generate jwt token
+        jwt_service = JwtService()
+
+        jwt_payload = {
+            "id": user.id,
+            "username": user.username,
+            "mode": user.mode.value
+        }
+
+        access_token = jwt_service.create_access_token(jwt_payload)
+        refresh_token = jwt_service.create_refresh_token(jwt_payload)
+
+        # set cookie
+        res.set_cookie("_P_jwt_access", access_token, httponly=True)
+        res.set_cookie("_P_jwt_refresh", refresh_token, httponly=True)
+
+        logger.info("login route - success")
         return user
     except ValueError as ve:
+        logger.error("update_mode route - error", exc_info=True)
         raise HTTPException(status_code=404, detail=str(ve))
 
     except Exception:
@@ -78,8 +97,64 @@ async def update_mode(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
+@router.post("/refresh")
+async def refresh_access_token(req: Request, res: Response):
+    try:
+        refresh_token = req.cookies.get("_P_jwt_refresh")
+
+        if not refresh_token:
+            raise HTTPException(
+                status_code=401, detail="Missing refresh token")
+
+        jwt_service = JwtService()
+        user_payload = jwt_service.decode_refresh_token(refresh_token)
+
+        access_payload = {
+            "id": user_payload.get("id"),
+            "username": user_payload.get("username"),
+            "mode": user_payload.get("mode"),
+        }
+
+        new_access_token = jwt_service.create_access_token(access_payload)
+        new_refresh_token = jwt_service.create_refresh_token(access_payload)
+        res.set_cookie("_P_jwt_access", new_access_token, httponly=True)
+        res.set_cookie("_P_jwt_refresh", new_refresh_token, httponly=True)
+
+        logger.info("refresh_access_token route - success")
+        return {"message": "Access token refreshed"}
+
+    except HTTPException:
+        raise
+    except Exception:
+        logger.error("refresh_access_token route - error", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/get_logged_user")
+async def get_logged_user(req: Request):
+    try:
+        access_token = req.cookies.get("_P_jwt_access")
+        if access_token:
+            jwt_service = JwtService()
+            user = jwt_service.decode_access_token(access_token)
+            if user:
+                logger.info("user data fetched successfully")
+                return user
+        return {}
+    except HTTPException:
+        # If access token is expired/invalid, keep the endpoint non-throwing.
+        # Frontend will interpret `{}` and call `/user/refresh`.
+        return {}
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+
+    except Exception:
+        logger.error("get_user_by_id route - error", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 @router.get("/get_user_by_id", response_model=UserResponse)
-async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_db)):
+async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_db_read)):
     try:
         service = UserService(session)
         user = await service.get_user_by_id(user_id)
