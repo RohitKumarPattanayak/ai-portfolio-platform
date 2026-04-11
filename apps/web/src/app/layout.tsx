@@ -60,7 +60,7 @@ const DashboardLayout = () => {
   }, [location.pathname])
 
   return (
-    <div className="flex h-screen w-full overflow-hidden font-sans text-gray-900 bg-gray-50 dark:text-gray-100 dark:bg-[#030303] selection:bg-indigo-500/30 transition-colors duration-500 pointer-events-auto">
+    <div className="flex h-screen w-full overflow-hidden font-sans text-gray-900 bg-gray-50 dark:text-gray-100 dark:bg-[#030303] selection:bg-indigo-500/30 pointer-events-auto">
       {/* Background - Light Mode: Clean glass, Dark mode: Cosmic */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         {/* Dark Mode Cosmic glow */}
@@ -121,21 +121,21 @@ const DashboardLayout = () => {
             to="/dashboard"
             end
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group ${isActive ? "bg-white dark:bg-white/[0.08] text-indigo-700 dark:text-white border border-gray-200 dark:border-white/[0.05] shadow-sm dark:shadow-lg dark:shadow-black/20 font-medium" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.03]"
+              `flex items-center gap-3 px-4 py-3 rounded-2xl group ${isActive ? "bg-white dark:bg-white/[0.08] text-indigo-700 dark:text-white border border-gray-200 dark:border-white/[0.05] shadow-sm dark:shadow-lg dark:shadow-black/20 font-medium" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.03]"
               }`
             }
           >
-            <LayoutDashboard size={18} className="transition-transform group-hover:scale-110" />
+            <LayoutDashboard size={18} className="group-hover:scale-110" />
             <span className="text-sm">Overview</span>
           </NavLink>
           <NavLink
             to="/dashboard/chat"
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group ${isActive ? "bg-white dark:bg-white/[0.08] text-indigo-700 dark:text-white border border-gray-200 dark:border-white/[0.05] shadow-sm dark:shadow-lg dark:shadow-black/20 font-medium" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.03]"
+              `flex items-center gap-3 px-4 py-3 rounded-2xl group ${isActive ? "bg-white dark:bg-white/[0.08] text-indigo-700 dark:text-white border border-gray-200 dark:border-white/[0.05] shadow-sm dark:shadow-lg dark:shadow-black/20 font-medium" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.03]"
               }`
             }
           >
-            <MessageSquare size={18} className="transition-transform group-hover:scale-110" />
+            <MessageSquare size={18} className="group-hover:scale-110" />
             <span className="text-sm">Action Board</span>
           </NavLink>
         </nav>
@@ -144,7 +144,7 @@ const DashboardLayout = () => {
         <div className="w-full px-4 mb-3">
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-white/50 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 text-gray-600 dark:text-gray-400 transition-all duration-300"
+            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-white/50 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 text-gray-600 dark:text-gray-400"
           >
             <span className="text-xs font-medium uppercase tracking-wider">{isDarkMode ? 'Dark Mode' : 'Light Mode'}</span>
             {isDarkMode ? <Moon size={14} className="text-indigo-400" /> : <Sun size={14} className="text-amber-500" />}
@@ -152,7 +152,7 @@ const DashboardLayout = () => {
         </div>
 
         <div className="w-full px-4 mt-auto">
-          <div className="p-3.5 rounded-2xl bg-white dark:bg-white/[0.02] border border-gray-200 dark:border-white/[0.05] flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/[0.04] transition-all cursor-pointer group shadow-sm dark:shadow-none dark:hover:shadow-xl dark:hover:shadow-black/20 relative overflow-hidden">
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-white/[0.02] border border-gray-200 dark:border-white/[0.05] flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/[0.04] cursor-pointer group shadow-sm dark:shadow-none dark:hover:shadow-xl dark:hover:shadow-black/20 relative overflow-hidden">
             {/* Hover shine effect */}
             <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
 
@@ -172,12 +172,12 @@ const DashboardLayout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className={`flex-1 h-full relative z-10 flex flex-col bg-transparent transition-all duration-300 w-full`}>
+      <main className={`flex-1 h-full relative z-10 flex flex-col bg-transparent w-full`}>
         {/* Top Navbar for Hamburger Menu */}
         <div className="absolute top-4 left-4 z-50 flex items-center">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2.5 bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 border border-gray-200 dark:border-white/[0.08] text-gray-800 dark:text-white rounded-xl shadow-sm dark:shadow-lg transition-all group"
+            className="p-2.5 bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 border border-gray-200 dark:border-white/[0.08] text-gray-800 dark:text-white rounded-xl shadow-sm dark:shadow-lg group"
           >
             <Menu size={20} className="text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
           </button>

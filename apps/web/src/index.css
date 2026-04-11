@@ -32,3 +32,22 @@
 .animate-skill-pop {
   animation: skill-pop 0.35s ease forwards;
 }
+
+/* Markdown content styling for chat */
+.markdown-content > p { margin-bottom: 1rem; }
+.markdown-content > h1 { font-size: 1.5rem; line-height: 2rem; font-weight: 700; }
+.markdown-content > h2 { font-size: 1.25rem; line-height: 1.75rem; font-weight: 700; }
+.markdown-content > h3 { font-size: 1.125rem; line-height: 1.75rem; font-weight: 700; }
+.markdown-content > ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 1rem; }
+.markdown-content > ol { list-style-type: decimal; padding-left: 1.25rem; margin-bottom: 1rem; }
+.markdown-content > li { margin-bottom: 0.25rem; }
+.markdown-content strong { color: #111827; }
+.dark .markdown-content strong { color: white; }
+.markdown-content code { background-color: #f3f4f6; padding: 0.125rem 0.375rem; border-radius: 0.375rem; }
+.dark .markdown-content code { background-color: rgba(255, 255, 255, 0.1); }
+.markdown-content > pre { background-color: #1f2937; color: #f3f4f6; padding: 1rem; border-radius: 0.75rem; overflow-x: auto; margin-bottom: 1rem; }
+
+/* Optimization for scroll container */
+.chat-scroll-container {
+  contain: content;
+}

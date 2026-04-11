@@ -5,12 +5,12 @@ import remarkGfm from 'remark-gfm';
 interface Props {
     content: string;
     animate: boolean;
-    onTyping?: () => void;
+    onComplete?: () => void;
 }
 
 const remarkPlugins = [remarkGfm];
 
-const TypewriterMarkdown = memo(({ content, animate, onTyping }: Props) => {
+const TypewriterMarkdown = memo(({ content, animate, onComplete }: Props) => {
     const [displayedContent, setDisplayedContent] = useState(animate ? "" : content);
     
     useEffect(() => {
@@ -26,14 +26,14 @@ const TypewriterMarkdown = memo(({ content, animate, onTyping }: Props) => {
             if (i >= content.length) {
                 setDisplayedContent(content);
                 clearInterval(interval);
+                if (onComplete) onComplete();
             } else {
                 setDisplayedContent(content.slice(0, i));
             }
-            if (onTyping) onTyping();
         }, 15);
 
         return () => clearInterval(interval);
-    }, [content, animate]);
+    }, [content, animate, onComplete]);
 
     return (
          <ReactMarkdown remarkPlugins={remarkPlugins}>
