@@ -1,4 +1,5 @@
 import { GraduationCap, Calendar, MapPin, Award } from "lucide-react";
+import React from 'react';
 
 type Education = {
     id: string
@@ -27,7 +28,7 @@ const EducationCard = ({ education = [], animate = false, onAnimationComplete }:
                     className={`
                         relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-50/50 to-white dark:from-white/[0.03] dark:to-white/[0.01] 
                         border border-indigo-100/50 dark:border-white/[0.08] p-6 shadow-sm 
-                        hover:shadow-md hover:-translate-y-1 transition-all duration-300 group
+                        hover:shadow-md hover:-translate-y-1 group
                         ${animate ? "animate-card-popup opacity-0" : ""}
                     `}
                 >
@@ -37,7 +38,7 @@ const EducationCard = ({ education = [], animate = false, onAnimationComplete }:
                     </div>
 
                     <div className="relative z-10 flex flex-col h-full">
-                        <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white dark:group-hover:bg-indigo-500 dark:group-hover:text-white transition-all duration-300 shadow-sm border border-indigo-200/50 dark:border-indigo-400/30">
+                        <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white dark:group-hover:bg-indigo-500 dark:group-hover:text-white shadow-sm border border-indigo-200/50 dark:border-indigo-400/30">
                             <GraduationCap size={24} />
                         </div>
 
@@ -66,4 +67,4 @@ const EducationCard = ({ education = [], animate = false, onAnimationComplete }:
     )
 }
 
-export default EducationCard
+export default React.memo(EducationCard)

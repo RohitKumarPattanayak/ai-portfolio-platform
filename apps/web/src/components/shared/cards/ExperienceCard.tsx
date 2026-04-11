@@ -1,4 +1,5 @@
 import { Briefcase, Calendar } from "lucide-react";
+import React from 'react';
 
 type Experience = {
     id: string
@@ -32,12 +33,12 @@ const ExperienceCard = ({ experiences = [], animate = false, onAnimationComplete
                         relative sm:pl-14 px-4 py-5 rounded-2xl bg-white dark:bg-white/[0.02] 
                         border border-gray-100 dark:border-white/[0.05] shadow-sm 
                         hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-500/30 
-                        transition-all duration-300 group
+                        group
                         ${animate ? "animate-card-popup opacity-0" : ""}
                     `}
                 >
                     {/* Timeline dot/icon - Only visible on sm and up */}
-                    <div className="absolute left-0 top-7 -translate-y-1/2 w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border-4 border-white dark:border-[#0a0a0c] items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-all duration-300 shadow-sm z-10 hidden sm:flex">
+                    <div className="absolute left-0 top-7 -translate-y-1/2 w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border-4 border-white dark:border-[#0a0a0c] items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 shadow-sm z-10 hidden sm:flex">
                         <Briefcase size={16} />
                     </div>
 
@@ -67,4 +68,4 @@ const ExperienceCard = ({ experiences = [], animate = false, onAnimationComplete
     )
 }
 
-export default ExperienceCard
+export default React.memo(ExperienceCard)

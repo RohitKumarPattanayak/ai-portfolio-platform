@@ -1,18 +1,13 @@
-import { useState, useRef, useEffect, lazy, Suspense, useMemo, useCallback } from "react";
-import { Terminal, Sparkles } from "lucide-react";
+import { useState, useRef, useEffect, useCallback, lazy } from "react";
 import { useUserStore } from "../../store/user.store";
 import { chatResponseMutation, getChatConversationQuery } from "../../react-queries/ChatQueries";
 import { useQueryClient } from "@tanstack/react-query";
-import LoadingFallback from "../../components/shared/LoadingFallback";
-import EmptyState from "../../components/chat/EmptyState";
+import ChatMessage from "../../components/chat/ChatMessage";
+import CommandBar from "../../components/chat/CommandBar";
 
-const TypewriterMarkdown = lazy(() => (import('../../components/shared/TypewriterMarkdown')))
-const ProjectsCard = lazy(() => (import('../../components/shared/cards/ProjectsCard')))
-const SkillsCard = lazy(() => (import('../../components/shared/cards/SkillsCard')))
-const ExperienceCard = lazy(() => (import('../../components/shared/cards/ExperienceCard')))
-const EducationCard = lazy(() => (import('../../components/shared/cards/EducationCard')))
-// const EmptyState = lazy(()=>(import ('../../components/chat/EmptyState')))
+const EmptyState = lazy(()=>(import ('../../components/chat/EmptyState')))
 
+// @ts-expect-error setting displayName on Lazy component
 EmptyState.displayName = "EmptyState";
 
 export const ChatPage = () => {
@@ -49,12 +44,7 @@ export const ChatPage = () => {
         setCurrentInput(text);
     }, []);
 
-    const sortedChatConversation = useMemo(() => {
-        if (!chatConversation || chatConversation.length === 0) return [];
-        return [...chatConversation].sort(
-            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        );
-    }, [chatConversation]);
+
     const handleSend = useCallback(async () => {
         if (!currentInput.trim() || isChatPending) return;
         if (!id) return;
@@ -68,9 +58,10 @@ export const ChatPage = () => {
                 id: Date.now(),
                 message: messageToSend,
                 role: "user",
+                content_type: "text",
                 created_at: new Date().toISOString()
             };
-            return oldData ? [newUserMessage, ...oldData] : [newUserMessage];
+            return oldData ? [...oldData, newUserMessage] : [newUserMessage];
         });
 
         try {
@@ -84,12 +75,12 @@ export const ChatPage = () => {
     }, [currentInput, isChatPending, id, queryClient, inputChatResponse]);
 
     return (
-        <div className="flex flex-col h-full w-full relative">
+        <div className="flex flex-col h-full w-full relative overflow-hidden">
             {/* Background radial gradient specifically for this page */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-100/50 dark:from-indigo-900/10 via-transparent dark:via-black/0 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-100/50 dark:from-indigo-900/10 via-transparent dark:via-black/0 to-transparent pointer-events-none transform-gpu" style={{ willChange: 'transform' }} />
 
             {/* Main Action Feed */}
-            <div className="flex-1 overflow-y-auto px-4 py-8 pb-64 scrollbar-hide relative z-10">
+            <div className="flex-1 overflow-y-auto px-4 py-8 pb-64 scrollbar-hide relative z-10 chat-scroll-container transform-gpu" style={{ willChange: 'transform' }}>
                 <div className="max-w-4xl mx-auto space-y-8">
                     {isChatConversationLoading ? (
                         <div className="h-[60vh] flex items-center justify-center">
@@ -103,81 +94,21 @@ export const ChatPage = () => {
                             <EmptyState onCommandClick={handleCommandClick} />
                         </div>
                     ) : (
-                        sortedChatConversation.map((msg) => (
-                            <div
+                        (chatConversation || []).map((msg: any, index: number) => (
+                            <ChatMessage
                                 key={msg.id}
-                                className="group animate-in slide-in-from-bottom-4 fade-in duration-500"
-                            >
-                                {msg.role === 'user' ? (
-                                    <div className="flex items-center gap-3 mb-6 pl-2">
-                                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.05] shadow-sm dark:shadow-none">
-                                            <span className="text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider">{username || "User"}</span>
-                                            <span className="text-gray-800 dark:text-gray-300 text-sm font-medium">{msg.message}</span>
-                                        </div>
-                                        <div className="text-[10px] text-gray-400 dark:text-gray-600 font-mono">
-                                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="relative pl-6 mb-8 before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-gradient-to-b before:from-indigo-300 dark:before:from-indigo-500/50 before:to-transparent">
-                                        <div className="p-6 rounded-3xl border transition-all duration-500 overflow-hidden relative bg-white/80 dark:bg-[#0a0a0c]/80 border-gray-200 dark:border-white/[0.06] shadow-xl dark:shadow-2xl hover:border-gray-300 dark:hover:border-white/[0.1] hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/5">
-                                            <div className="text-[15px] leading-relaxed text-gray-700 dark:text-gray-200 tracking-wide [&>p]:mb-4 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-4 [&>li]:mb-1 [&_strong]:text-gray-900 [&_strong]:dark:text-white [&_code]:bg-gray-100 [&_code]:dark:bg-white/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&>pre]:bg-gray-800 [&>pre]:text-gray-100 [&>pre]:p-4 [&>pre]:rounded-xl [&>pre]:overflow-x-auto [&>pre]:mb-4">
-                                                {msg.content_type == 'text' &&
-                                                    <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading markup response..." />}>
-                                                        <TypewriterMarkdown
-                                                            content={msg.message}
-                                                            animate={new Date(msg.created_at).getTime() > sessionStartTime.current}
-                                                            onTyping={scrollToBottomInstant}
-                                                        />
-                                                    </Suspense>
-                                                }
-                                                {msg.content_type === "list_projects" && (
-                                                    <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading skills..." />}>
-                                                        <ProjectsCard
-                                                            projects={msg.message}
-                                                            animate={new Date(msg.created_at).getTime() > sessionStartTime.current}
-                                                            onAnimationComplete={scrollToBottomInstant}
-                                                        />
-                                                    </Suspense>
-                                                )}
-                                                {msg.content_type == "list_skills" && (
-                                                    <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading skills..." />}>
-                                                        <SkillsCard
-                                                            skills={msg.message}
-                                                            animate={new Date(msg.created_at).getTime() > sessionStartTime.current}
-                                                            onAnimationComplete={scrollToBottomInstant}
-                                                        />
-                                                    </Suspense>
-                                                )}
-                                                {msg.content_type === "list_experience" && (
-                                                    <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading experience..." />}>
-                                                        <ExperienceCard
-                                                            experiences={msg.message}
-                                                            animate={new Date(msg.created_at).getTime() > sessionStartTime.current}
-                                                            onAnimationComplete={scrollToBottomInstant}
-                                                        />
-                                                    </Suspense>
-                                                )}
-                                                {msg.content_type === "list_education" && (
-                                                    <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading education..." />}>
-                                                        <EducationCard
-                                                            education={msg.message}
-                                                            animate={new Date(msg.created_at).getTime() > sessionStartTime.current}
-                                                            onAnimationComplete={scrollToBottomInstant}
-                                                        />
-                                                    </Suspense>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                                msg={msg}
+                                username={username || "User"}
+                                sessionStartTime={sessionStartTime.current}
+                                scrollToBottomInstant={scrollToBottomInstant}
+                                isLatest={index === (chatConversation || []).length - 1}
+                            />
                         ))
                     )}
                     {isChatPending && (
                         <div className="group animate-in slide-in-from-bottom-4 fade-in duration-500 mb-8">
                             <div className="relative pl-6 before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-gradient-to-b before:from-indigo-300 dark:before:from-indigo-500/50 before:to-transparent">
-                                <div className="p-6 rounded-3xl border transition-all duration-500 overflow-hidden relative bg-white/50 dark:bg-white/[0.01] border-indigo-200 dark:border-indigo-500/20 shadow-[0_0_30px_rgba(99,102,241,0.1)] dark:shadow-[0_0_30px_rgba(99,102,241,0.05)]">
+                                <div className="p-6 rounded-3xl border overflow-hidden relative bg-white/50 dark:bg-white/[0.01] border-indigo-200 dark:border-indigo-500/20 shadow-[0_0_30px_rgba(99,102,241,0.1)] dark:shadow-[0_0_30px_rgba(99,102,241,0.05)]">
                                     <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400">
                                         <div className="w-4 h-4 rounded-full border-2 border-indigo-300 dark:border-indigo-500/30 border-t-indigo-600 dark:border-t-indigo-500 animate-spin" />
                                         <span className="text-sm font-mono tracking-wide animate-pulse">Processing execution cluster...</span>
@@ -191,51 +122,12 @@ export const ChatPage = () => {
             </div>
 
             {/* Floating Command Bar */}
-            <div className="fixed bottom-4 md:bottom-10 left-1/2 -translate-x-1/2 w-full max-w-4xl px-2 sm:px-4 z-50">
-                <div className="relative group">
-                    {/* Outer glow */}
-                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-300 dark:from-indigo-500 to-emerald-300 dark:to-emerald-500 rounded-[2rem] blur opacity-30 dark:opacity-20 group-hover:opacity-60 dark:group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
-
-                    <div className="relative flex items-center bg-white/90 dark:bg-black/80 border border-gray-200 dark:border-white/10 rounded-[2rem] shadow-2xl overflow-hidden transition-all duration-300 focus-within:bg-white dark:focus-within:bg-black/90 focus-within:border-indigo-300 dark:focus-within:border-white/20 focus-within:ring-2 dark:focus-within:ring-1 focus-within:ring-indigo-500/50">
-                        <div className="pl-6 pr-3 flex items-center text-indigo-500 dark:text-indigo-400">
-                            <Terminal size={18} />
-                        </div>
-
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            id="input-chat-bar"
-                            value={currentInput}
-                            onChange={(e) => setCurrentInput(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                    e.preventDefault();
-                                    handleSend();
-                                }
-                            }}
-                            placeholder="Enter system command..."
-                            className="w-full bg-transparent text-gray-900 dark:text-gray-100 py-5 text-[15px] placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none tracking-wide"
-                            spellCheck="false"
-                            disabled={isChatPending}
-                        />
-
-                        <div id="send-chat-button" className="pr-3 pl-2 py-2">
-                            <button
-                                onClick={handleSend}
-                                disabled={!currentInput.trim() || isChatPending}
-                                className="p-3 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-full hover:bg-indigo-700 dark:hover:bg-indigo-50 dark:hover:text-indigo-600 transition-all duration-300 disabled:opacity-50 disabled:scale-95 disabled:cursor-not-allowed focus:outline-none flex items-center justify-center transform active:scale-90 shadow-md"
-                            >
-                                <code className="text-[10px] font-bold tracking-widest uppercase mr-1.5 opacity-80 dark:opacity-60">{isChatPending ? 'SENDING' : 'SEND'}</code>
-                                {isChatPending ? (
-                                    <div className="w-4 h-4 border-2 border-white/30 dark:border-black/30 border-t-white dark:border-t-black rounded-full animate-spin" />
-                                ) : (
-                                    <Sparkles size={16} className="opacity-100 dark:opacity-80" />
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <CommandBar
+                currentInput={currentInput}
+                setCurrentInput={setCurrentInput}
+                handleSend={handleSend}
+                isChatPending={isChatPending}
+            />
         </div>
     );
 };

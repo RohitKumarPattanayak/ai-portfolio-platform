@@ -11,6 +11,8 @@ type ProjectsGridProps = {
   onAnimationComplete?: () => void
 }
 
+import React from 'react';
+
 const ProjectsCard = ({ projects = [], animate = false, onAnimationComplete }: ProjectsGridProps) => {
   return (
     <div className="grid gap-3 mt-3">
@@ -23,7 +25,7 @@ const ProjectsCard = ({ projects = [], animate = false, onAnimationComplete }: P
           onAnimationEnd={onAnimationComplete}
           className={`
             group block rounded-xl border border-neutral-200 bg-white p-4 shadow-sm
-            hover:shadow-md hover:border-neutral-300 transition-all duration-200
+            hover:shadow-md hover:border-neutral-300
             ${animate ? "animate-card-popup opacity-0" : ""}
           `}
         >
@@ -44,4 +46,4 @@ const ProjectsCard = ({ projects = [], animate = false, onAnimationComplete }: P
   )
 }
 
-export default ProjectsCard
+export default React.memo(ProjectsCard)

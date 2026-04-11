@@ -9,6 +9,8 @@ type SkillsGridProps = {
     onAnimationComplete?: () => void
 }
 
+import React from 'react';
+
 const Skillscard = ({ skills = [], animate = false, onAnimationComplete }: SkillsGridProps) => {
     return (
         <div className="flex flex-wrap gap-2 mt-2">
@@ -32,7 +34,6 @@ const Skillscard = ({ skills = [], animate = false, onAnimationComplete }: Skill
                         hover:bg-blue-50
                         hover:border-blue-200
                         hover:text-blue-700
-                        transition-all duration-200
                         ${animate ? "animate-skill-pop opacity-0" : ""}
                     `}
                 >
@@ -43,4 +44,4 @@ const Skillscard = ({ skills = [], animate = false, onAnimationComplete }: Skill
     )
 }
 
-export default Skillscard
+export default React.memo(Skillscard)
