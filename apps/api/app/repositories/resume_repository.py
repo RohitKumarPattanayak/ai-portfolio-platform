@@ -94,6 +94,30 @@ class ResumeRepository:
         await self.session.refresh(chunk)
         return chunk
 
+    async def update_structured_chunk(
+        self,
+        chunk_id: int,
+        meta_data: dict | str,
+        content: str,
+        embedding: list[float]
+    ):
+        result = await self.session.execute(
+            select(ResumeChunkModel).where(ResumeChunkModel.id == chunk_id)
+        )
+        chunk = result.scalar_one_or_none()
+        if not chunk:
+            raise Exception("Chunk not found for update.")
+
+        chunk.meta_data = meta_data
+        chunk.content = content
+        chunk.embedding = embedding
+
+        self.session.add(chunk)
+        await self.session.commit()
+        await self.session.refresh(chunk)
+        return chunk
+
+
     async def search_similar_chunks(
         self,
         query_embedding: list[float],

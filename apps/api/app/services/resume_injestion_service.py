@@ -88,7 +88,7 @@ class ResumeIngestionService:
                 "upload_resume - Error occurred in ResumeIngestionService", exc_info=True)
             raise
         
-    async def _store_structured_chunk(self, resume_id, section, meta_data):
+    async def _store_structured_chunk(self, resume_id, section, meta_data, chunk_id=None):
         try:
             content_for_embedding = f"Section: {section}\n"
 
@@ -176,13 +176,21 @@ class ResumeIngestionService:
                 content_for_embedding
             )
 
-            chunk = await self.resumeRepo.save_structured_chunk(
-                resume_id=resume_id,
-                section=section,
-                meta_data=meta_data,
-                content=content_for_embedding,
-                embedding=embedding
-            )
+            if chunk_id:
+                chunk = await self.resumeRepo.update_structured_chunk(
+                    chunk_id=chunk_id,
+                    meta_data=meta_data,
+                    content=content_for_embedding,
+                    embedding=embedding
+                )
+            else:
+                chunk = await self.resumeRepo.save_structured_chunk(
+                    resume_id=resume_id,
+                    section=section,
+                    meta_data=meta_data,
+                    content=content_for_embedding,
+                    embedding=embedding
+                )
 
             return chunk
         except Exception as e:
@@ -191,5 +199,34 @@ class ResumeIngestionService:
             raise
 
     async def inject_manual_data(self, resume_id: int, section: str, data: dict | str):
-        chunk = await self._store_structured_chunk(resume_id, section=section, meta_data=data)
+        target_chunk_id = None
+        
+        # Handle the alias resume_owner_img -> resume_owner_pic
+        if section == "resume_owner_img":
+            section = "resume_owner_pic"
+            if isinstance(data, dict) and "resume_owner_img" in data:
+                data["resume_owner_pic"] = data.pop("resume_owner_img")
+
+        existing_chunks = await self.resumeRepo.get_chunks_by_resume_id(resume_id, [section])
+        
+        if section == "projects":
+             # Use the 'title' key to uniquely identify which project we're manually querying
+             if isinstance(data, dict) and "title" in data:
+                 for chunk in existing_chunks:
+                     if chunk.meta_data and chunk.meta_data.get("title") == data["title"]:
+                         target_chunk_id = chunk.id
+                         # Merge new keys over existing project mapping
+                         merged_data = chunk.meta_data.copy()
+                         merged_data.update(data)
+                         data = merged_data
+                         break
+        elif section in ["resume_owner_pic", "personal_info", "social_links", "introduction"]:
+             if existing_chunks:
+                 target_chunk_id = existing_chunks[0].id
+                 if isinstance(data, dict) and isinstance(existing_chunks[0].meta_data, dict):
+                     merged_data = existing_chunks[0].meta_data.copy()
+                     merged_data.update(data)
+                     data = merged_data
+
+        chunk = await self._store_structured_chunk(resume_id, section=section, meta_data=data, chunk_id=target_chunk_id)
         return chunk
