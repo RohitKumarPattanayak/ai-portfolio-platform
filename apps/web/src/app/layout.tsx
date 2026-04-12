@@ -172,7 +172,7 @@ const DashboardLayout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className={`flex-1 h-full relative z-10 flex flex-col bg-transparent w-full`}>
+      <main className={`flex-1 h-full relative z-10 flex flex-col bg-transparent w-full overflow-y-auto overflow-x-hidden`}>
         {/* Top Navbar for Hamburger Menu */}
         <div className="absolute top-4 left-4 z-50 flex items-center">
           <button
