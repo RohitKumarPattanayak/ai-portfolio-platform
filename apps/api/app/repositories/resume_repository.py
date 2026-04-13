@@ -121,7 +121,7 @@ class ResumeRepository:
     async def search_similar_chunks(
         self,
         query_embedding: list[float],
-        limit: int = 5
+        limit: int = 10
     ):
         active_resume = await self.get_active_resume()
 
@@ -143,7 +143,7 @@ class ResumeRepository:
     async def search_similar_chunks_v2(
         self,
         query_embedding: list[float],
-        limit: int = 5
+        limit: int = 15
     ):
         active_resume = await self.get_active_resume()
         if not active_resume:
@@ -162,7 +162,7 @@ class ResumeRepository:
             .limit(limit)
         )
         rows = result.all()
-        SIMILARITY_THRESHOLD = 0.35
+        SIMILARITY_THRESHOLD = 0.65
         return [
             row[0]
             for row in rows

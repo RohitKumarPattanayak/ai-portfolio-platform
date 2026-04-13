@@ -93,6 +93,7 @@ class ChatService:
                     "company": p.meta_data.get("company"),
                     "tech_stack": p.meta_data.get("tech_stack"),
                     "description": p.meta_data.get("description"),
+                    "project_pic": p.meta_data.get("project_pic"),
                 }
                 for p in projects
             ]

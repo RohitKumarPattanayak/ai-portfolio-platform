@@ -80,16 +80,30 @@ async def list_resumes(
             result = await db.execute(select(ResumeModel))
         resumes = result.scalars().all()
 
-        logger.info("list_resumes - Resumes listed successfully")
-
-        return [
-            {
+        repo = ResumeRepository(db)
+        response_data = []
+        for r in resumes:
+            chunks = await repo.get_chunks_by_resume_id(r.id, ["resume_owner_pic", "personal_info"])
+            pic_meta = None
+            personal_meta = None
+            
+            for c in chunks:
+                if c.section == "resume_owner_pic":
+                    pic_meta = c.meta_data
+                elif c.section == "personal_info":
+                    personal_meta = c.meta_data
+                    
+            response_data.append({
                 "id": r.id,
                 "name": r.name,
-                "is_active": r.is_active
-            }
-            for r in resumes
-        ]
+                "is_active": r.is_active,
+                "resume_owner_pic": pic_meta,
+                "personal_info": personal_meta
+            })
+
+        logger.info("list_resumes - Resumes listed successfully")
+
+        return response_data
     except Exception as e:
         logger.error("list_resumes - Error occurred", exc_info=True)
         raise
