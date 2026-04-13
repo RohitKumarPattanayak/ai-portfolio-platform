@@ -95,3 +95,13 @@ https://www.youtube.com/watch?v=_ngCLZ5Iz-0
 3) rollup-plugin-visualizer (For size division and analysis of bundle size)
 
 4) React-scan (For scanning and analyzing the bundle size)
+
+5) Here are the aggressive optimizations I've applied to chat.tsx and ChatMessage.tsx:
+
+-Compositor Layers: Added explicit transform-gpu and will-change-transform tags exclusively onto the Chat layout and background. The browser now kicks these into the GPU instantly, treating them as static floating images during the scroll rather than forcing a layout-repaint.
+
+-Killed Alpha Cascades: Removed the .8 opacity scales from the individual message bubbles (bg-white/80), replacing them with solid, opaque backgrounds. Translucent elements sliding over a complex radial background are disastrous for scroll FPS.
+
+-Optimized Transitions: Degraded transition-all duration-500 strictly to transition-colors duration-200. This prevents your browser from recalculating element dimensions or box-resize margins repeatedly while interacting at 60Hz.
+
+-Stripped Shadow Janks: Massive shadow-2xl values on multiple chat nodes stack rapidly and kill rendering speed. I dropped them to lightweight, hardware-friendly shadow-sm bounds.
