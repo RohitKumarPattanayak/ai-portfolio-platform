@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import ChatMessage from "../../components/chat/ChatMessage";
 import CommandBar from "../../components/chat/CommandBar";
 
-const EmptyState = lazy(()=>(import ('../../components/chat/EmptyState')))
+const EmptyState = lazy(() => (import('../../components/chat/EmptyState')))
 
 // @ts-expect-error setting displayName on Lazy component
 EmptyState.displayName = "EmptyState";
@@ -93,7 +93,7 @@ export const ChatPage = () => {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-100/50 dark:from-indigo-900/10 via-transparent dark:via-black/0 to-transparent pointer-events-none transform-gpu" style={{ willChange: 'transform' }} />
 
             {/* Main Action Feed */}
-            <div className="flex-1 overflow-y-auto px-4 py-8 pb-64 scrollbar-hide relative z-10 chat-scroll-container transform-gpu" style={{ willChange: 'transform' }}>
+            <div className="flex-1 overflow-y-auto px-4 py-8 scrollbar-hide relative z-10 chat-scroll-container transform-gpu" style={{ willChange: 'transform' }}>
                 <div className="max-w-4xl mx-auto space-y-8">
                     {isChatConversationLoading ? (
                         <div className="h-[60vh] flex items-center justify-center">
@@ -133,7 +133,6 @@ export const ChatPage = () => {
                     <div ref={messagesEndRef} className="h-4" />
                 </div>
             </div>
-
             {/* Floating Command Bar */}
             <CommandBar
                 currentInput={currentInput}

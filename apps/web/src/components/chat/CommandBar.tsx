@@ -17,7 +17,7 @@ const CommandBar = memo(({ currentInput, setCurrentInput, handleSend, isChatPend
     }, []);
 
     return (
-        <div className="fixed bottom-4 md:bottom-10 left-1/2 -translate-x-1/2 w-full max-w-4xl px-2 sm:px-4 z-50">
+        <div className="w-full max-w-[58rem] px-2 sm:px-4 mt-auto mx-auto pb-4 sm:pb-6 md:pb-8">
             <div className="relative group">
                 {/* Outer glow */}
                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-300 dark:from-indigo-500 to-emerald-300 dark:to-emerald-500 rounded-[2rem] blur opacity-30 dark:opacity-20 group-hover:opacity-60 dark:group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
