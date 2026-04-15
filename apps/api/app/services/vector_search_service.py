@@ -14,7 +14,7 @@ class VectorSearchService:
         self.embedding_service = EmbeddingService(session)
         self.resumeRepo = ResumeRepository(session)
 
-    async def search(self, query: str, limit: int = 15):
+    async def search(self, query: str, limit: int = 8):
         try:
             # Generate query embedding
             query_embedding = await self.embedding_service.generate_embedding(query)
@@ -24,8 +24,9 @@ class VectorSearchService:
                 query_embedding=query_embedding,
                 limit=limit
             )
-
+            # print("search similar chunks found : ",len(chunks))
             results = [chunk.content for chunk in chunks]
+            print("search similar chunks found : ",len(results))
 
             logger.info("search - Vector search completed successfully")
 
