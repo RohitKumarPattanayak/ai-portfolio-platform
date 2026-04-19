@@ -1,13 +1,18 @@
-import { scan } from 'react-scan'
+// import { scan } from 'react-scan'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { AppProviders } from './app/providers.tsx'
 import { AppRouter } from './app/router.tsx'
 
-scan({
-  enabled: false
-})
+// scan({
+//   enabled: true
+// })
+
+// add the below in package.json
+/*
+"react-scan": "^0.5.3",
+*/
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
