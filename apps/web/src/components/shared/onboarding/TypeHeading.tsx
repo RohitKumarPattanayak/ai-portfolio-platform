@@ -24,13 +24,14 @@ const TypingHeading = memo(({ fullText, isActiveResumeLoading, isTypingComplete,
     }, [fullText, isActiveResumeLoading, setIsTypingComplete])
 
     return (
-        <div className="relative w-full mb-2 min-h-[32px]">
-            {/* Invisible placeholder pre-allocates exact final layout bounds, preventing expensive DOM reflows when text grows */}
-            <h2 className="text-2xl font-bold tracking-tight invisible pointer-events-none select-none" aria-hidden="true">
+        <div className="relative w-full mb-2 min-h-[28px] flex justify-center text-center">
+            {/* Invisible placeholder */}
+            <h2 className="text-sm sm:text-base md:text-lg font-medium tracking-[0.04em] invisible pointer-events-none select-none font-mono">
                 {fullText}
                 <span>|</span>
             </h2>
-            <h2 className="absolute top-0 left-0 w-full h-full text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+
+            <h2 className="absolute inset-0 flex items-center justify-center text-sm sm:text-base md:text-lg font-semibold tracking-[0.04em] text-gray-900 dark:text-white font-mono">
                 {typedText}
                 {!isTypingComplete && <span className="animate-pulse">|</span>}
             </h2>

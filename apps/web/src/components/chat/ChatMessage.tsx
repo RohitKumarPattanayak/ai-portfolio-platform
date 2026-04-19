@@ -9,13 +9,13 @@ const EducationCard = lazy(() => import("../shared/cards/EducationCard"));
 
 interface ChatMessageProps {
     msg: any;
-    username: string;
+    username?: string;
     sessionStartTime: number;
     scrollToBottomInstant: () => void;
     isLatest: boolean;
 }
 
-const ChatMessage = memo(({ msg, username, sessionStartTime, scrollToBottomInstant, isLatest }: ChatMessageProps) => {
+const ChatMessage = memo(({ msg, sessionStartTime, scrollToBottomInstant, isLatest }: ChatMessageProps) => {
     return (
         <div
             className={`group ${isLatest ? "animate-in slide-in-from-bottom-4 fade-in duration-500" : ""}`}

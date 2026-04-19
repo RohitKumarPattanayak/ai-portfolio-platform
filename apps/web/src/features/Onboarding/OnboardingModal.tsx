@@ -86,6 +86,7 @@ const UserDropdown = memo(({
 const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | 'signup' | 'login' | 'hidden') => void }) => {
   const { data: activeResume, error: activeResumeError, isLoading: isActiveResumeLoading } = onboardingFetchActiveResume()
   const [isTypingComplete, setIsTypingComplete] = useState(false)
+  const [showGuestPrompt, setShowGuestPrompt] = useState(false)
 
   const setUser = useUserStore((s) => s.setUser)
   const navigate = useNavigate()
@@ -100,7 +101,11 @@ const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | '
   const handleSignupClick = useCallback(() => onModeSelect('signup'), [onModeSelect])
   const handleLoginClick = useCallback(() => onModeSelect('login'), [onModeSelect])
 
-  const handleGuestClick = useCallback(async () => {
+  const handleGuestClick = useCallback(() => {
+    setShowGuestPrompt(true)
+  }, [])
+
+  const handleAuthorizeGuest = useCallback(async () => {
     try {
       const user = await updateMutation({ user_id: 0, mode: "recruiter" }) as UserItem
       setUser(user.id, user.username, user.mode)
@@ -110,6 +115,34 @@ const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | '
       onModeSelect('hidden')
     }
   }, [navigate, onModeSelect, setUser, updateMutation])
+
+  if (showGuestPrompt) {
+    return (
+      <div className="w-full flex flex-col items-center animate-in fade-in zoom-in duration-300">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">Are you sure?</h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm text-center leading-relaxed">
+          We recommend creating a unique user Index.<br />
+          It helps us better understand different users and improve answer quality.<br /><br />
+          <span className="font-semibold text-gray-800 dark:text-gray-200">No personal data is collected — it's just for indexing purposes.</span>
+        </p>
+        <div className="flex flex-col gap-3 w-full">
+          <button
+            onClick={() => setShowGuestPrompt(false)}
+            className="w-full py-3 bg-[indigo] text-white font-medium border-0 cursor-pointer shadow-sm hover:bg-[#fa6a50] transition-colors"
+          >
+            Sure
+          </button>
+          <button
+            onClick={handleAuthorizeGuest}
+            disabled={isPending}
+            className="w-full py-3 bg-gray-100 dark:bg-gray-800 disabled:opacity-50 text-gray-900 dark:text-gray-100 font-medium border-0 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            {isPending ? "Loading..." : "No, proceed as Guest"}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -125,7 +158,7 @@ const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | '
         <TypingHeading fullText={fullText} isActiveResumeLoading={isActiveResumeLoading} isTypingComplete={isTypingComplete} setIsTypingComplete={setIsTypingComplete} />
       </div>
 
-      <p className="text-gray-600 dark:text-gray-400 mb-8 text-sm text-center max-w-[280px]">
+      <p className="text-gray-500 dark:text-gray-400 mb-8 text-[12px] sm:text-xs text-center max-w-[220px] mx-auto font-mono tracking-[0.03em] leading-relaxed">
         Explore the portfolio details effortlessly.
       </p>
 
@@ -133,20 +166,20 @@ const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | '
         <button
           onClick={handleSignupClick}
           disabled={!isTypingComplete}
-          className="w-full py-3 bg-[#ff7b63] disabled:bg-[#ff7b63]/50 text-white font-medium border-0 cursor-pointer"
+          className="w-full py-3 bg-[indigo]/50 disabled:bg-[indigo]/20 text-white font-medium border-0 cursor-pointer"
         >
-          Sign Up
+          Generate User Index
         </button>
         <button
           onClick={handleLoginClick}
           disabled={!isTypingComplete}
           className="w-full py-3 bg-gray-100 dark:bg-gray-800 disabled:opacity-50 text-gray-900 dark:text-gray-100 font-medium border-0 cursor-pointer"
         >
-          Log In
+          Already indexed
         </button>
       </div>
 
-      <button onClick={handleGuestClick} className="mt-6 text-sm text-gray-500 border-0 bg-transparent cursor-pointer">
+      <button onClick={handleGuestClick} className="mt-6 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-0 bg-transparent cursor-pointer transition-colors">
         Continue as Guest
       </button>
     </div>
@@ -191,7 +224,7 @@ const SignUpView = memo(({ onCancel }: { onCancel: () => void }) => {
           </select>
         </div>
 
-        <button onClick={handleCreate} disabled={isPending || !username.trim()} className="w-full mt-2 py-3 bg-[#ff7b63] disabled:bg-gray-400 text-white font-medium border-0 cursor-pointer">
+        <button onClick={handleCreate} disabled={isPending || !username.trim()} className="w-full mt-2 py-3 bg-[indigo]/50 disabled:bg-gray-400 text-white font-medium border-0 cursor-pointer">
           {isPending ? "Loading..." : "Create Account"}
         </button>
 
@@ -285,7 +318,7 @@ const LoginView = memo(({ onCancel }: { onCancel: () => void }) => {
               </select>
             </div>
 
-            <button onClick={handleLogin} disabled={isPending} className="w-full mt-2 py-3 bg-[#ff7b63] disabled:bg-gray-400 text-white font-medium border-0 cursor-pointer">
+            <button onClick={handleLogin} disabled={isPending} className="w-full mt-2 py-3 bg-[indigo]/50 disabled:bg-gray-400 text-white font-medium border-0 cursor-pointer">
               {isPending ? "Loading..." : "Log In"}
             </button>
 
