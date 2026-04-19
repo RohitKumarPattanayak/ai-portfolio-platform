@@ -58,6 +58,16 @@ class UserService:
             )
             raise
 
+    async def get_user_by_name(self, username: str):
+        try:
+            return await self.repo.get_by_username(username)
+        except Exception:
+            logger.error(
+                f"get_user_by_name service - username={username} error",
+                exc_info=True
+            )
+            raise
+
     async def get_all_users(self, params):
         try:
             users, total = await self.repo.get_all_users(params)

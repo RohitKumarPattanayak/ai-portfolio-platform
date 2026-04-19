@@ -92,6 +92,7 @@ class UserRepository:
                     UserModel,
                     func.count().over().label("total_count")
                 )
+                .where(UserModel.username != "guest")
                 .order_by(UserModel.id.asc())
             )
 

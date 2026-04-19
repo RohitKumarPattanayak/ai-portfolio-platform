@@ -88,9 +88,22 @@ async def login_user(
     session: AsyncSession = Depends(get_db_write),
 ):
     try:
+        # 
+        if user_id == 0:
+            service = UserService(session)
+            user = await service.get_user_by_name("guest")
+            if not user:
+                user = await service.create_user(
+                    username="guest",
+                    mode=UserMode.recruiter
+                )
+            authenticate_set_cookie(user, res)
+            print("user", user)
+            return user
+            
         service = UserService(session)
         user = await service.update_mode(user_id, mode)
-
+        
         authenticate_set_cookie(user, res)
 
         logger.info("login route - success")
