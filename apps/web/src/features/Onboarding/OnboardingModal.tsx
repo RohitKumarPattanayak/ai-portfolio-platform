@@ -12,65 +12,48 @@ type UserItem = {
   mode: UserMode
 }
 
-type SearchInputProps = {
-  value: string
-  onChange: (value: string) => void
-}
+const DebouncedSearchInput = memo(({ onDebouncedChange }: { onDebouncedChange: (v: string) => void }) => {
+  const [local, setLocal] = useState("");
+  const debounceRef = useRef<number | null>(null);
 
-type UserRowProps = {
-  user: UserItem
-  onSelect: (user: UserItem) => void
-}
-
-type UserDropdownProps = {
-  isOpen: boolean
-  search: string
-  onSearchChange: (value: string) => void
-  users: UserItem[]
-  isLoading: boolean
-  isFetchingNextPage: boolean
-  hasNextPage: boolean
-  onScroll: (e: React.UIEvent<HTMLUListElement>) => void
-  onSelectUser: (user: UserItem) => void
-}
-
-const SearchInput = memo(({ value, onChange }: SearchInputProps) => {
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value)
-  }, [onChange])
+    const val = e.target.value;
+    setLocal(val);
+    if (debounceRef.current !== null) window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(() => {
+      onDebouncedChange(val);
+    }, 300);
+  }, [onDebouncedChange]);
 
   return (
-    <div className="p-2 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-black/40">
+    <div className="p-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
       <input
         autoFocus
-        value={value}
+        value={local}
         onChange={handleChange}
         placeholder="Search users..."
-        className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/5 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+        className="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none"
       />
     </div>
   )
 })
 
-const UserRow = memo(({ user, onSelect }: UserRowProps) => {
-  const handleClick = useCallback(() => {
-    onSelect(user)
-  }, [onSelect, user])
+const UserRow = memo(({ user, onSelect }: { user: UserItem, onSelect: (user: UserItem) => void }) => {
+  const handleClick = useCallback(() => onSelect(user), [onSelect, user])
 
   return (
     <li
       onClick={handleClick}
-      className="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-50 dark:hover:text-white dark:hover:bg-white/5 cursor-pointer transition-colors flex items-center justify-between group"
+      className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer flex items-center justify-between border-b border-gray-100 dark:border-gray-800 last:border-0"
     >
       <span>{user.username}</span>
-      <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400">{user.mode}</span>
+      <span className="text-[10px] uppercase text-gray-500">{user.mode}</span>
     </li>
   )
 })
 
 const UserDropdown = memo(({
   isOpen,
-  search,
   onSearchChange,
   users,
   isLoading,
@@ -78,48 +61,35 @@ const UserDropdown = memo(({
   hasNextPage,
   onScroll,
   onSelectUser,
-}: UserDropdownProps) => {
+}: any) => {
   if (!isOpen) return null
 
   return (
-    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#121216] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 [will-change:transform] [will-change:opacity]">
-      <SearchInput value={search} onChange={onSearchChange} />
+    <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#121216] border border-gray-200 dark:border-gray-800 shadow-md z-50">
+      <DebouncedSearchInput onDebouncedChange={onSearchChange} />
       <ul
         onScroll={onScroll}
-        className="max-h-48 overflow-y-auto w-full scrollbar-hide py-1"
+        className="max-h-48 overflow-y-auto w-full py-0 m-0 list-none"
       >
-        {isLoading && <li className="px-4 py-3 text-sm text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full border-2 border-indigo-200 dark:border-indigo-400/30 border-t-indigo-600 dark:border-t-indigo-400 animate-spin" />
-          Loading directory...
-        </li>}
-        {users.map((u) => (
+        {isLoading && <li className="px-4 py-3 text-sm text-gray-500">Loading directory...</li>}
+        {users.map((u: UserItem) => (
           <UserRow key={u.id} user={u} onSelect={onSelectUser} />
         ))}
-        {isFetchingNextPage && <li className="px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full border-2 border-gray-200 dark:border-gray-500/30 border-t-gray-500 animate-spin" />
-          Indexing...
-        </li>}
-        {!hasNextPage && !isLoading && users.length > 0 && <li className="px-4 py-3 text-[11px] text-center text-gray-400 dark:text-white/20 uppercase tracking-widest font-semibold bg-gray-50 dark:bg-black/20">End of directory</li>}
+        {isFetchingNextPage && <li className="px-4 py-3 text-sm text-gray-500">Indexing...</li>}
+        {!hasNextPage && !isLoading && users.length > 0 && <li className="px-4 py-3 text-[11px] text-center text-gray-400 uppercase font-bold bg-gray-50 dark:bg-gray-900">End of directory</li>}
         {!isLoading && users.length === 0 && <li className="px-4 py-4 text-sm text-center text-gray-500">No matching identities</li>}
       </ul>
     </div>
   )
 })
 
-const OnboardingModal = () => {
-  const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null)
-  const [username, setName] = useState("")
-  const [mode, setMode] = useState<UserMode>("candidate")
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<UserItem | null>(null)
-
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-
+const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | 'signup' | 'login' | 'hidden') => void }) => {
   const { data: activeResume, error: activeResumeError, isLoading: isActiveResumeLoading } = onboardingFetchActiveResume()
-
   const [isTypingComplete, setIsTypingComplete] = useState(false)
+
+  const setUser = useUserStore((s) => s.setUser)
+  const navigate = useNavigate()
+  const { mutateAsync: updateMutation, isPending } = onboardingLoginUser()
 
   const fullText = isActiveResumeLoading
     ? "Loading data..."
@@ -127,37 +97,69 @@ const OnboardingModal = () => {
       ? `Welcome To ${activeResume.name}'s Portfolio`
       : "Welcome To Portfolio"
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(search)
-    }, 500)
-    return () => clearTimeout(handler)
-  }, [search])
+  const handleSignupClick = useCallback(() => onModeSelect('signup'), [onModeSelect])
+  const handleLoginClick = useCallback(() => onModeSelect('login'), [onModeSelect])
+
+  const handleGuestClick = useCallback(async () => {
+    try {
+      const user = await updateMutation({ user_id: 0, mode: "recruiter" }) as UserItem
+      setUser(user.id, user.username, user.mode)
+      navigate("/dashboard/chat")
+    } catch (error) {
+      console.error("Guest login failed", error)
+      onModeSelect('hidden')
+    }
+  }, [navigate, onModeSelect, setUser, updateMutation])
+
+  return (
+    <div className="w-full flex flex-col items-center">
+      <img src="/illustration.png" alt="" className="w-[180px] h-auto mb-6 opacity-90" />
+
+      {activeResumeError && (
+        <div className="p-3 mb-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm w-full text-center border border-red-200 dark:border-red-800">
+          Failed to fetch active resume
+        </div>
+      )}
+
+      <div className="mb-4 w-full flex justify-center">
+        <TypingHeading fullText={fullText} isActiveResumeLoading={isActiveResumeLoading} isTypingComplete={isTypingComplete} setIsTypingComplete={setIsTypingComplete} />
+      </div>
+
+      <p className="text-gray-600 dark:text-gray-400 mb-8 text-sm text-center max-w-[280px]">
+        Explore the portfolio details effortlessly.
+      </p>
+
+      <div className="flex flex-col gap-3 w-full">
+        <button
+          onClick={handleSignupClick}
+          disabled={!isTypingComplete}
+          className="w-full py-3 bg-[#ff7b63] disabled:bg-[#ff7b63]/50 text-white font-medium border-0 cursor-pointer"
+        >
+          Sign Up
+        </button>
+        <button
+          onClick={handleLoginClick}
+          disabled={!isTypingComplete}
+          className="w-full py-3 bg-gray-100 dark:bg-gray-800 disabled:opacity-50 text-gray-900 dark:text-gray-100 font-medium border-0 cursor-pointer"
+        >
+          Log In
+        </button>
+      </div>
+
+      <button onClick={handleGuestClick} className="mt-6 text-sm text-gray-500 border-0 bg-transparent cursor-pointer">
+        Continue as Guest
+      </button>
+    </div>
+  )
+})
+
+const SignUpView = memo(({ onCancel }: { onCancel: () => void }) => {
+  const [username, setUsername] = useState("")
+  const [mode, setMode] = useState<UserMode>("candidate")
 
   const setUser = useUserStore((s) => s.setUser)
   const navigate = useNavigate()
-
-  const { mutateAsync: createMutation, isPending: isCreatePending, isError: isCreateError, error: createError } = onboardingCreateUser()
-  const { mutateAsync: updateMutation, isPending: isUpdatePending, isError: isUpdateError, error: updateError } = onboardingLoginUser()
-  const { data: loggedUser } = onboardingGetLoggedUser()
-
-  useEffect(() => {
-    if (!loggedUser) return
-
-    setUser(loggedUser.id, loggedUser.username, loggedUser.mode)
-    navigate("/dashboard/chat")
-
-  }, [loggedUser])
-
-  // Since we fetch users directly, handleLogin just sets the store state locally.
-  const handleLogin = useCallback(async () => {
-    if (!username.trim()) return
-    if (!selectedUser) return
-    const user = await updateMutation({ user_id: selectedUser.id, mode }) as UserItem
-
-    setUser(user.id, user.username, user.mode)
-    navigate("/dashboard/chat")
-  }, [mode, navigate, selectedUser, setUser, updateMutation, username])
+  const { mutateAsync: createMutation, isPending, isError, error } = onboardingCreateUser()
 
   const handleCreate = useCallback(async () => {
     if (!username.trim()) return
@@ -166,232 +168,161 @@ const OnboardingModal = () => {
     navigate("/dashboard/chat")
   }, [createMutation, mode, navigate, setUser, username])
 
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    if (/^[a-zA-Z0-9]*$/.test(value)) setUsername(value)
+  }, [])
+  const handleModeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => setMode(e.target.value as UserMode), [])
+
+  return (
+    <div className="w-full">
+      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center">Sign Up</h3>
+
+      <div className="flex flex-col gap-4">
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">USERNAME</label>
+          <input value={username} onChange={handleNameChange} className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#121216] p-3 text-gray-900 dark:text-gray-100 outline-none" placeholder="Enter username..." />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">MODE</label>
+          <select value={mode} onChange={handleModeChange} className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#121216] p-3 text-gray-900 dark:text-gray-100 outline-none appearance-none">
+            <option value="candidate">Candidate</option>
+            <option value="recruiter">Recruiter</option>
+          </select>
+        </div>
+
+        <button onClick={handleCreate} disabled={isPending || !username.trim()} className="w-full mt-2 py-3 bg-[#ff7b63] disabled:bg-gray-400 text-white font-medium border-0 cursor-pointer">
+          {isPending ? "Loading..." : "Create Account"}
+        </button>
+
+        {isError && <div className="text-red-500 text-sm text-center border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 p-2">{error?.message || "Error creating user"}</div>}
+
+        <button onClick={onCancel} className="mt-2 text-sm text-gray-500 border-0 bg-transparent cursor-pointer w-full">Cancel</button>
+      </div>
+    </div>
+  )
+})
+
+const LoginView = memo(({ onCancel }: { onCancel: () => void }) => {
+  const [mode, setMode] = useState<UserMode>("candidate")
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<UserItem | null>(null)
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+
+  const setUser = useUserStore((s) => s.setUser)
+  const navigate = useNavigate()
+  const { mutateAsync: updateMutation, isPending, isError, error } = onboardingLoginUser()
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = onboardingFetchAllUsersInfinite(debouncedSearch, 10)
-  const users = useMemo<UserItem[]>(() => {
-    return data?.pages.flatMap((page) => page.items as UserItem[]) || []
-  }, [data])
+
+  const users = useMemo<UserItem[]>(() => data?.pages.flatMap((page) => page.items as UserItem[]) || [], [data])
 
   const userCacheRef = useRef<Map<string, UserItem[]>>(new Map())
   useEffect(() => {
-    if (users.length > 0) {
-      userCacheRef.current.set(debouncedSearch, users)
-    }
+    if (users.length > 0) userCacheRef.current.set(debouncedSearch, users)
   }, [debouncedSearch, users])
 
-  const stableUsers = useMemo<UserItem[]>(() => {
-    return users.length > 0 ? users : (userCacheRef.current.get(debouncedSearch) ?? [])
-  }, [debouncedSearch, users])
+  const stableUsers = useMemo<UserItem[]>(() => users.length > 0 ? users : (userCacheRef.current.get(debouncedSearch) ?? []), [debouncedSearch, users])
 
+  const handleLogin = useCallback(async () => {
+    if (!selectedUser) return
+    const user = await updateMutation({ user_id: selectedUser.id, mode }) as UserItem
+    setUser(user.id, user.username, user.mode)
+    navigate("/dashboard/chat")
+  }, [mode, navigate, selectedUser, setUser, updateMutation])
+
+  const throttleRef = useRef(false)
   const handleScroll = useCallback((e: React.UIEvent<HTMLUListElement>) => {
-    const bottom = e.currentTarget.scrollTop + e.currentTarget.clientHeight >= e.currentTarget.scrollHeight - 10
-    if (bottom && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
-    }
+    if (throttleRef.current) return
+    throttleRef.current = true
+    setTimeout(() => { throttleRef.current = false }, 150)
+
+    const target = e.currentTarget
+    const bottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 50
+    if (bottom && hasNextPage && !isFetchingNextPage) fetchNextPage()
   }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
   const handleSelectUser = useCallback((user: UserItem) => {
     setSelectedUser(user)
-    setName(user.username)
     setMode(user.mode)
     setIsDropdownOpen(false)
   }, [])
 
-  const handleSearchChange = useCallback((value: string) => {
-    setSearch(value)
-  }, [])
+  const handleToggleDropdown = useCallback(() => setIsDropdownOpen(p => !p), [])
+  const handleModeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => setMode(e.target.value as UserMode), [])
 
   return (
-    <div className="fixed inset-0 z-[9999] flex justify-center items-center p-4">
-      {/* Decoupled backdrop overlay to prevent repainting when modal content changes */}
-      <div className="absolute inset-0 bg-white/80 dark:bg-black/80  transition-colors duration-500 pointer-events-none" />
+    <div className="w-full">
+      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center">Log In</h3>
 
-      <div className="w-full max-w-md bg-white border border-gray-200 dark:bg-[#0a0a0c]/90 dark:border-white/10 p-8 rounded-[2rem] shadow-2xl relative z-10 text-gray-900 dark:text-gray-100 transition-colors duration-500 transform-gpu">
+      <div className="flex flex-col gap-4">
+        <div className="relative">
+          <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">IDENTITY</label>
+          <div onClick={handleToggleDropdown} className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#121216] p-3 text-gray-900 dark:text-gray-100 cursor-pointer flex justify-between">
+            <span>{selectedUser ? selectedUser.username : "Choose profile..."}</span>
+            <span className="text-xs text-gray-500">▼</span>
+          </div>
 
-        {/* Decorative background glow */}
-        <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-100/50 dark:from-indigo-500/10 via-transparent to-transparent pointer-events-none transform-gpu" />
-
-        <div className="relative z-10 flex flex-col gap-6">
-          {isFirstTime === null && (
-            <div className="text-center animate-in fade-in zoom-in duration-500">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.2)] dark:shadow-[0_0_30px_rgba(99,102,241,0.3)] mb-6">
-                <span className="text-3xl text-white">👋</span>
-              </div>
-              {activeResumeError && (
-                <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-sm">
-                  ⚠️ Failed to fetch active resume: {activeResumeError?.message}
-                </div>
-              )}
-              <TypingHeading fullText={fullText} isActiveResumeLoading={isActiveResumeLoading} isTypingComplete={isTypingComplete} setIsTypingComplete={setIsTypingComplete} />
-              <p className={`text-gray-500 dark:text-gray-400 mb-8 text-sm transition-opacity duration-700 ${isTypingComplete ? 'opacity-100' : 'opacity-0'}`}>
-                Is this your first time accessing the portfolio ?
-              </p>
-
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => setIsFirstTime(true)}
-                  disabled={!isTypingComplete}
-                  className="py-3 px-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-all font-medium text-gray-700 dark:text-white shadow-sm dark:shadow-none active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
-                >
-                  Yes, I'm new
-                </button>
-                <button
-                  onClick={() => setIsFirstTime(false)}
-                  disabled={!isTypingComplete}
-                  className="py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-all font-medium text-white shadow-[0_4px_14px_0_rgb(0,118,255,0.39)] hover:shadow-[0_6px_20px_rgba(0,118,255,0.23)] dark:shadow-[0_0_20px_rgba(79,70,229,0.3)] dark:hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] active:scale-95 border border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:shadow-none"
-                >
-                  No, Already Accesed
-                </button>
-              </div>
-            </div>
-          )}
-
-          {isFirstTime === true && (
-            <div className="animate-in slide-in-from-right-8 fade-in duration-500">
-              <h3 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                <span className="w-2 h-6 bg-indigo-500 rounded-full inline-block"></span>
-                Create Profile
-              </h3>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Unique Name</label>
-                  <input
-                    placeholder="Enter username..."
-                    value={username}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      if (/^[a-zA-Z0-9]*$/.test(value)) {
-                        setName(value)
-                      }
-                    }}
-                    className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Access Mode</label>
-                  <select
-                    value={mode}
-                    onChange={(e) => setMode(e.target.value as UserMode)}
-                    className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="candidate" className="bg-white dark:bg-[#0a0a0c]">Candidate</option>
-                    <option value="recruiter" className="bg-white dark:bg-[#0a0a0c]">Recruiter</option>
-                  </select>
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    onClick={handleCreate}
-                    disabled={isCreatePending || !username.trim()}
-                    className="w-full py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-400 dark:disabled:bg-indigo-600/50 disabled:cursor-not-allowed transition-all font-medium text-white shadow-[0_4px_14px_0_rgb(0,118,255,0.39)] dark:shadow-[0_0_20px_rgba(79,70,229,0.3)] border border-indigo-500 flex justify-center items-center"
-                  >
-                    {isCreatePending ? (
-                      <span className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                        Initializing...
-                      </span>
-                    ) : "Initialize Profile"}
-                  </button>
-                </div>
-
-                {isCreateError && (
-                  <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-sm">
-                    ⚠️ Failed to create user: {createError?.message}
-                  </div>
-                )}
-
-                <button
-                  onClick={() => setIsFirstTime(null)}
-                  className="w-full text-center text-xs text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors mt-4"
-                >
-                  ← Back to welcome
-                </button>
-              </div>
-            </div>
-          )}
-
-          {isFirstTime === false && (
-            <div className="animate-in slide-in-from-left-8 fade-in duration-500">
-              <h3 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                <span className="w-2 h-6 bg-emerald-500 rounded-full inline-block"></span>
-                System Login
-              </h3>
-
-              <div className="space-y-4">
-                <div className="relative">
-                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Select Identity</label>
-                  <div
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 rounded-xl px-4 py-3 text-gray-700 dark:text-gray-300 cursor-pointer flex items-center justify-between transition-all"
-                  >
-                    <span className={selectedUser ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-500"}>
-                      {selectedUser ? selectedUser.username : "Choose your profile..."}
-                    </span>
-                    <span className="text-gray-400 dark:text-gray-600 text-xs">▼</span>
-                  </div>
-
-                  <UserDropdown
-                    isOpen={isDropdownOpen}
-                    search={search}
-                    onSearchChange={handleSearchChange}
-                    users={stableUsers}
-                    isLoading={isLoading}
-                    isFetchingNextPage={isFetchingNextPage}
-                    hasNextPage={Boolean(hasNextPage)}
-                    onScroll={handleScroll}
-                    onSelectUser={handleSelectUser}
-                  />
-                </div>
-
-                {selectedUser && (
-                  <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider mt-4">Access Mode</label>
-                    <select
-                      value={mode}
-                      onChange={(e) => setMode(e.target.value as UserMode)}
-                      className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all appearance-none cursor-pointer"
-                    >
-                      <option value="candidate" className="bg-white dark:bg-[#0a0a0c]">Candidate</option>
-                      <option value="recruiter" className="bg-white dark:bg-[#0a0a0c]">Recruiter</option>
-                    </select>
-
-                    <div className="pt-6">
-                      <button
-                        onClick={handleLogin}
-                        disabled={isUpdatePending}
-                        className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-400 dark:disabled:bg-emerald-600/50 disabled:cursor-not-allowed transition-all font-medium text-white shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] dark:shadow-[0_0_20px_rgba(16,185,129,0.3)] border border-emerald-500 flex justify-center items-center"
-                      >
-                        {isUpdatePending ? (
-                          <span className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                            Authenticating...
-                          </span>
-                        ) : "Proceed To Portfolio Chatbot"}
-                      </button>
-                    </div>
-
-                    {isUpdateError && (
-                      <div className="mt-3 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-sm">
-                        ⚠️ Authentication failed: {updateError?.message}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <button
-                  onClick={() => {
-                    setIsFirstTime(null);
-                    setSelectedUser(null);
-                  }}
-                  className="w-full text-center text-xs text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors mt-6"
-                >
-                  ← Back to welcome
-                </button>
-              </div>
-            </div>
-          )}
+          <UserDropdown
+            isOpen={isDropdownOpen}
+            onSearchChange={setDebouncedSearch}
+            users={stableUsers}
+            isLoading={isLoading}
+            isFetchingNextPage={isFetchingNextPage}
+            hasNextPage={Boolean(hasNextPage)}
+            onScroll={handleScroll}
+            onSelectUser={handleSelectUser}
+          />
         </div>
+
+        {selectedUser && (
+          <>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">MODE</label>
+              <select value={mode} onChange={handleModeChange} className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#121216] p-3 text-gray-900 dark:text-gray-100 outline-none appearance-none">
+                <option value="candidate">Candidate</option>
+                <option value="recruiter">Recruiter</option>
+              </select>
+            </div>
+
+            <button onClick={handleLogin} disabled={isPending} className="w-full mt-2 py-3 bg-[#ff7b63] disabled:bg-gray-400 text-white font-medium border-0 cursor-pointer">
+              {isPending ? "Loading..." : "Log In"}
+            </button>
+
+            {isError && <div className="text-red-500 text-sm text-center border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 p-2">{error?.message || "Login failed"}</div>}
+          </>
+        )}
+
+        <button onClick={onCancel} className="mt-2 text-sm text-gray-500 border-0 bg-transparent cursor-pointer w-full">Cancel</button>
+      </div>
+    </div>
+  )
+})
+
+const OnboardingModal = () => {
+  const [view, setView] = useState<'welcome' | 'signup' | 'login' | 'hidden'>('welcome')
+
+  const { data: loggedUser } = onboardingGetLoggedUser()
+  const setUser = useUserStore((s) => s.setUser)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!loggedUser) return
+    setUser(loggedUser.id, loggedUser.username, loggedUser.mode)
+    navigate("/dashboard/chat")
+  }, [loggedUser, setUser, navigate])
+
+  const handleModeSelect = useCallback((v: 'welcome' | 'signup' | 'login' | 'hidden') => setView(v), [])
+  const handleCancel = useCallback(() => setView('welcome'), [])
+
+  if (view === 'hidden') return null
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex justify-center items-center bg-white dark:bg-[#0a0a0c] bg-cover bg-center bg-no-repeat">
+      <div className="w-full max-w-sm bg-white/90 dark:bg-[#0a0a0c]/90 p-8 border border-gray-200 dark:border-gray-800 flex flex-col items-center shadow-lg">
+        {view === 'welcome' && <WelcomeView onModeSelect={handleModeSelect} />}
+        {view === 'signup' && <SignUpView onCancel={handleCancel} />}
+        {view === 'login' && <LoginView onCancel={handleCancel} />}
       </div>
     </div>
   )
