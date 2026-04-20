@@ -31,24 +31,24 @@ const Portfolio = memo(({ data }: PortfolioProps) => {
 
           {/* Content Section - Subtle Gradient */}
           <div className="bg-gradient-to-b from-white via-gray-50 to-white dark:from-[#020617] dark:via-[#080d1e] dark:to-[#020617] transition-colors duration-300">
-            <nav className="fixed top-2 left-1/2 -translate-x-1/2 z-50">
-              <div className="flex gap-5 px-4 py-1.5 rounded-full 
-                  bg-white/20 dark:bg-white/5 
-                  backdrop-blur-sm">
+            <nav className="fixed top-2 sm:top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] sm:w-auto overflow-x-auto scrollbar-hide py-1 transform-gpu">
+              <div className="flex gap-2 sm:gap-5 px-3 sm:px-5 py-1.5 sm:py-2 rounded-full 
+                  bg-white/80 dark:bg-[#0f172a]/90 
+                 shadow-sm dark:shadow-none mx-auto w-max transform-gpu border border-gray-200/50 dark:border-white/10">
 
-                <a href="#experience" className="text-xs text-gray-500/70 dark:text-gray-400/60 hover:text-indigo-600">
+                <a href="#experience" className="text-[8px] sm:text-xs font-medium text-gray-600/80 dark:text-gray-400/80 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors uppercase tracking-wider">
                   Experience
                 </a>
 
-                <a href="#projects" className="text-xs text-gray-500/70 dark:text-gray-400/60 hover:text-indigo-600">
+                <a href="#projects" className="text-[8px] sm:text-xs font-medium text-gray-600/80 dark:text-gray-400/80 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors uppercase tracking-wider">
                   Projects
                 </a>
 
-                <a href="#skills" className="text-xs text-gray-500/70 dark:text-gray-400/60 hover:text-indigo-600">
+                <a href="#skills" className="text-[8px] sm:text-xs font-medium text-gray-600/80 dark:text-gray-400/80 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors uppercase tracking-wider">
                   Skills
                 </a>
 
-                <a href="#education" className="text-xs text-gray-500/70 dark:text-gray-400/60 hover:text-indigo-600">
+                <a href="#education" className="text-[8px] sm:text-xs font-medium text-gray-600/80 dark:text-gray-400/80 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors uppercase tracking-wider">
                   Education
                 </a>
 
