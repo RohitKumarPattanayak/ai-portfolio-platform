@@ -53,11 +53,12 @@ export const ChatPage = () => {
         inputRef.current?.focus();
     }, []);
 
-    const handleSend = useCallback(async () => {
-        if (!currentInput.trim() || isChatPending) return;
+    const handleSend = useCallback(async (forcedInput?: string) => {
+        const inputToUse = typeof forcedInput === "string" ? forcedInput : currentInput;
+        if (!inputToUse.trim() || isChatPending) return;
         if (!id) return;
 
-        const messageToSend = currentInput.trim();
+        const messageToSend = inputToUse.trim();
         setCurrentInput("");
 
         // Optimistically add user message to cache

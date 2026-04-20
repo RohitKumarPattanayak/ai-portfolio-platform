@@ -1,10 +1,11 @@
 import { memo, useRef, useEffect } from "react";
 import { Terminal, Sparkles } from "lucide-react";
+import SuggestionPrompt from "./SuggestionPrompt";
 
 interface CommandBarProps {
     currentInput: string;
     setCurrentInput: (val: string) => void;
-    handleSend: () => void;
+    handleSend: (forcedInput?: string) => void;
     isChatPending: boolean;
 }
 
@@ -18,6 +19,7 @@ const CommandBar = memo(({ currentInput, setCurrentInput, handleSend, isChatPend
 
     return (
         <div className="w-full max-w-[58rem] px-2 sm:px-4 mt-auto mx-auto pb-4 sm:pb-6 md:pb-8">
+            <SuggestionPrompt handleSend={handleSend} setCurrentInput={setCurrentInput} />
             <div className="relative group">
                 {/* Outer glow */}
                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-300 dark:from-indigo-500 to-emerald-300 dark:to-emerald-500 rounded-[2rem] blur opacity-30 dark:opacity-20 group-hover:opacity-60 dark:group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
@@ -47,7 +49,7 @@ const CommandBar = memo(({ currentInput, setCurrentInput, handleSend, isChatPend
 
                     <div id="send-chat-button" className="pr-3 pl-2 py-2">
                         <button
-                            onClick={handleSend}
+                            onClick={() => handleSend()}
                             disabled={!currentInput.trim() || isChatPending}
                             className="p-3 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-full hover:bg-indigo-700 dark:hover:bg-indigo-50 dark:hover:text-indigo-600 transition-all duration-300 disabled:opacity-50 disabled:scale-95 disabled:cursor-not-allowed focus:outline-none flex items-center justify-center transform active:scale-90 shadow-md"
                         >

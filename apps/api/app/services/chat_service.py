@@ -327,7 +327,7 @@ class ChatService:
                     "data": total_exp
                 }
 
-            elif intent == "list_projects":
+            elif intent == "list_projects" or intent == "List Projects ?":
                 logger.info("Intent matched with list_projects - Streaming response")
                 projects = await self._list_projects()
                 await self.chat_repo.create_message(user_id, "assistant", str(projects), mode, 'list_projects')
@@ -337,7 +337,7 @@ class ChatService:
                     "data": projects
                 }
 
-            elif intent == "list_experience":
+            elif intent == "list_experience" or intent == "List Work Experience ?":
                 logger.info("Intent matched with list_experience - Streaming response")
                 experience = await self._list_experience()
                 await self.chat_repo.create_message(user_id, "assistant", str(experience), mode, 'list_experience')
@@ -347,7 +347,7 @@ class ChatService:
                     "data": experience
                 }
 
-            elif intent == "list_education":
+            elif intent == "list_education" or intent == "Highest Education ?":
                 logger.info("Intent matched with list_education - Streaming response")
                 education = await self._list_education()
                 await self.chat_repo.create_message(user_id, "assistant", str(education), mode, 'list_education')
@@ -357,7 +357,7 @@ class ChatService:
                     "data": education
                 }
 
-            elif intent == "list_skills":
+            elif intent == "list_skills" or intent == "List Skills ?":
                 logger.info("Intent matched with list_skills - Streaming response")
                 skills = await self._list_skills()
                 await self.chat_repo.create_message(user_id, "assistant", str(skills), mode, 'list_skills')
