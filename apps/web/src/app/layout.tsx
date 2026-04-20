@@ -111,7 +111,7 @@ const DashboardLayout = () => {
             </div>
             <div>
               <h1 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">PROFILE</h1>
-              <p className="text-[9px] uppercase font-bold tracking-widest text-indigo-600 dark:text-indigo-400/80 truncate max-w-[120px]">{personal_info?.name || "System"}</p>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-indigo-600 dark:text-indigo-400/80 truncate max-w-[120px]">{personal_info?.name || "System"}</p>
             </div>
           </div>
           <button
@@ -176,7 +176,7 @@ const DashboardLayout = () => {
               <UserCircle className="text-gray-500 dark:text-gray-300" size={20} strokeWidth={1.5} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 dark:text-gray-200 truncate group-hover:text-indigo-600 dark:group-hover:text-white transition-colors">{username || "Commander"}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-200 truncate group-hover:text-indigo-600 dark:group-hover:text-white transition-colors capitalize">{username || "Commander"}</p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] dark:shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
                 <p className="text-[10px] text-gray-500 font-medium tracking-wide">SYSTEM ACTIVE</p>
