@@ -3,8 +3,9 @@ import { Outlet, NavLink, useLocation } from "react-router-dom"
 import { useUserStore } from "../store/user.store"
 import { useActiveResumeStore } from "../store/active_resume.store"
 import LoadingFallback from "../components/shared/LoadingFallback"
+import { api } from "../services/api"
 const OnboardingModal = lazy(() => import("../features/Onboarding/OnboardingModal"))
-import { MessageSquare, LayoutDashboard, Settings, UserCircle, Zap, Menu, X, Sun, Moon } from "lucide-react"
+import { MessageSquare, LayoutDashboard, LogOut, UserCircle, Zap, Menu, X, Sun, Moon } from "lucide-react"
 
 const DashboardLayout = () => {
   const { username } = useUserStore()
@@ -157,7 +158,17 @@ const DashboardLayout = () => {
         </div>
 
         <div className="w-full px-4 mt-auto">
-          <div className="p-3.5 rounded-2xl bg-white dark:bg-white/[0.02] border border-gray-200 dark:border-white/[0.05] flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/[0.04] cursor-pointer group shadow-sm dark:shadow-none dark:hover:shadow-xl dark:hover:shadow-black/20 relative overflow-hidden">
+          <div
+            className="p-3.5 rounded-2xl bg-white dark:bg-white/[0.02] border border-gray-200 dark:border-white/[0.05] flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/[0.04] cursor-pointer group shadow-sm dark:shadow-none dark:hover:shadow-xl dark:hover:shadow-black/20 relative overflow-hidden"
+            onClick={async () => {
+              try {
+                await api.post('/user/logout');
+              } catch (error) {
+                console.error("Logout failed", error);
+              }
+              window.location.reload();
+            }}
+          >
             {/* Hover shine effect */}
             <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
 
@@ -171,7 +182,7 @@ const DashboardLayout = () => {
                 <p className="text-[10px] text-gray-500 font-medium tracking-wide">SYSTEM ACTIVE</p>
               </div>
             </div>
-            <Settings size={16} className="text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-white transition-colors group-hover:rotate-45 duration-300" />
+            <LogOut size={16} className="text-red-400 dark:text-red-400 group-hover:text-red-500 dark:group-hover:text-red-500 transition-colors duration-300" />
           </div>
         </div>
       </aside>

@@ -230,7 +230,7 @@ const SignUpView = memo(({ onCancel }: { onCancel: () => void }) => {
           {isPending ? "Loading..." : "Create Account"}
         </button>
 
-        {isError && <div className="text-red-500 text-sm text-center border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 p-2">{error?.message || "Error creating user"}</div>}
+        {isError && <div className="text-red-500 text-sm text-center border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 p-2">{"Error creating user please provide a unique name."}</div>}
 
         <button onClick={onCancel} className="mt-2 text-sm text-gray-500 border-0 bg-transparent cursor-pointer w-full">Cancel</button>
       </div>

@@ -188,3 +188,9 @@ async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_db_re
     except Exception:
         logger.error("get_user_by_id route - error", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.post("/logout")
+async def logout_user(res: Response):
+    res.delete_cookie("_P_jwt_access")
+    res.delete_cookie("_P_jwt_refresh")
+    return {"message": "Logged out successfully"}
