@@ -109,7 +109,7 @@ const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | '
     try {
       const user = await updateMutation({ user_id: 0, mode: "recruiter" }) as UserItem
       setUser(user.id, user.username, user.mode)
-      navigate("/dashboard/chat")
+      navigate("/dashboard")
     } catch (error) {
       console.error("Guest login failed", error)
       onModeSelect('hidden')
@@ -263,7 +263,7 @@ const LoginView = memo(({ onCancel }: { onCancel: () => void }) => {
     if (!selectedUser) return
     const user = await updateMutation({ user_id: selectedUser.id, mode }) as UserItem
     setUser(user.id, user.username, user.mode)
-    navigate("/dashboard/chat")
+    navigate("/dashboard")
   }, [mode, navigate, selectedUser, setUser, updateMutation])
 
   const throttleRef = useRef(false)

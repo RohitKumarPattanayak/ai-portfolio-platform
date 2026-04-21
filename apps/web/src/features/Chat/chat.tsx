@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, lazy } from "react";
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
 import { useUserStore } from "../../store/user.store";
 import { useActiveResumeStore } from "../../store/active_resume.store";
 import { onboardingFetchActiveResume } from "../../react-queries/OnboardingQueries";
@@ -24,17 +24,6 @@ export const ChatPage = () => {
     const { mutateAsync: inputChatResponse, isPending: isChatPending } = chatResponseMutation();
     const { data: chatConversation, isLoading: isChatConversationLoading } = getChatConversationQuery(id || 0);
 
-    const setResumeDetails = useActiveResumeStore((s) => s.setResumeDetails);
-    const { data: activeResume } = onboardingFetchActiveResume();
-
-    useEffect(() => {
-        if (activeResume) {
-            setResumeDetails(
-                activeResume.resume_owner_pic,
-                activeResume.personal_info
-            );
-        }
-    }, [activeResume, setResumeDetails]);
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, []);
@@ -100,7 +89,14 @@ export const ChatPage = () => {
                         </div>
                     ) : (!chatConversation || chatConversation.length === 0) ? (
                         <div className="h-[60vh] flex items-center justify-center">
-                            <EmptyState />
+                            <Suspense fallback={
+                                <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400">
+                                    <div className="w-5 h-5 rounded-full border-2 border-indigo-300 dark:border-indigo-500/30 border-t-indigo-600 dark:border-t-indigo-500 animate-spin" />
+                                    <span className="text-sm font-mono tracking-wide animate-pulse">Initializing UI...</span>
+                                </div>
+                            }>
+                                <EmptyState />
+                            </Suspense>
                         </div>
                     ) : (
                         (chatConversation || []).map((msg: any, index: number) => (

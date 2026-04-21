@@ -1,12 +1,24 @@
 import { dashboardFetchPortfolio } from "../../react-queries/DashboardQueries";
 import { Loader2 } from "lucide-react";
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
+import { useActiveResumeStore } from "../../store/active_resume.store";
+import { onboardingFetchActiveResume } from "../../react-queries/OnboardingQueries";
 
 // Lazy loading the isolated portfolio component for efficient bundle splitting
 const Portfolio = lazy(() => import('../Portfolio/Portfolio'));
 
 const DashboardPage = () => {
     const { data, isLoading, isError, error } = dashboardFetchPortfolio();
+    const setResumeDetails = useActiveResumeStore((s) => s.setResumeDetails);
+    const { data: activeResume } = onboardingFetchActiveResume();
+    useEffect(() => {
+        if (activeResume) {
+            setResumeDetails(
+                activeResume.resume_owner_pic,
+                activeResume.personal_info
+            );
+        }
+    }, [activeResume, setResumeDetails]);
     if (isLoading) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-transparent space-y-4">

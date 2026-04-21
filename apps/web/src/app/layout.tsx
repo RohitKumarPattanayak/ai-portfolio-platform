@@ -16,12 +16,7 @@ const DashboardLayout = () => {
   const [isDarkMode, setIsDarkMode] = useState(false)
 
   // Sidebar state
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.innerWidth >= 768
-    }
-    return true
-  })
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   // Prevent transition flicker on initial load
   const [isMounted, setIsMounted] = useState(false)
@@ -94,7 +89,7 @@ const DashboardLayout = () => {
 
       {/* Sidebar - Heavily Glassmorphic & Responsive */}
       <aside
-        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white/70 font-mono dark:border-white/[0.04] dark:bg-black/40 flex flex-col items-center py-8 pb-6 z-30 ${isMounted ? "transition-transform duration-300 ease-in-out" : ""
+        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white sm:bg-white/70 font-mono dark:border-white/[0.1] dark:bg-black sm:bg-black/40 flex flex-col items-center py-8 pb-6 z-30 ${isMounted ? "transition-transform duration-300 ease-in-out" : ""
           } ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:hidden"}`}
       >
         <div className="mb-10 px-6 w-full flex items-center justify-between gap-4">
@@ -190,7 +185,7 @@ const DashboardLayout = () => {
       {/* Main Content Area */}
       <main className={`flex-1 h-full relative z-10 flex flex-col bg-transparent w-full overflow-y-auto overflow-x-hidden`}>
         {/* Top Navbar for Hamburger Menu */}
-        <div className="sticky top-0 z-50 w-full h-0 pointer-events-none">
+        <div className="sticky top-0 z-[60] w-full h-0 pointer-events-none">
           <div className="absolute top-4 left-4 pointer-events-auto flex items-center">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
