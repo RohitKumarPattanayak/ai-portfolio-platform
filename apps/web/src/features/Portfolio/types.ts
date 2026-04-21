@@ -8,4 +8,5 @@ export interface PortfolioData {
     resume_owner_pic?: Array<{ meta_data: { resume_owner_pic: string } }>;
     social_links?: Array<{ meta_data: { github: string; linkedin: string } }>;
     projects?: Array<{ meta_data: { title: string; company: string; tech_stack: string[]; description: string; project_pic: string; impact?: string } }>;
+    resume_link?: Array<{ meta_data: string }>;
 }

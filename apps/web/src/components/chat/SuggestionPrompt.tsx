@@ -38,7 +38,7 @@ const SuggestionPrompt = ({ handleSend, setCurrentInput }: SuggestionPromptProps
                 )}
             </button>
             <span className="text-xs text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                Try out our suggestions for a visually appealing response
+                Pick a Suggestion for a Visualized Response
             </span>
         </div>
 
