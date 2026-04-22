@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="ingest" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="chat" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="store" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="audit" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#be185d"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981"/>
+    </marker>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feOffset dx="0" dy="2" result="off"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="820" fill="url(#bgGrad)"/>
+
+  <!-- Title -->
+  <text x="600" y="42" text-anchor="middle" fill="#f8fafc" font-size="24" font-weight="700">Backend Architecture — Ingestion &amp; RAG Flow</text>
+  <text x="600" y="68" text-anchor="middle" fill="#94a3b8" font-size="13">FastAPI · SQLAlchemy · PostgreSQL + pgvector · OpenAI</text>
+
+  <!-- Lane labels -->
+  <rect x="30" y="95" width="6" height="300" fill="url(#ingest)" rx="3"/>
+  <text x="50" y="115" fill="#c7d2fe" font-size="13" font-weight="700">RESUME INGESTION · One-time activity</text>
+
+  <rect x="30" y="430" width="6" height="230" fill="url(#chat)" rx="3"/>
+  <text x="50" y="450" fill="#a7f3d0" font-size="13" font-weight="700">USER INTERACTION · Runtime</text>
+
+  <!-- ========== INGESTION ROW ========== -->
+  <!-- 1. Upload -->
+  <g filter="url(#soft)">
+    <rect x="50" y="135" width="170" height="80" rx="12" fill="url(#ingest)"/>
+    <text x="135" y="165" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">1. Resume Upload</text>
+    <text x="135" y="185" text-anchor="middle" fill="#e0e7ff" font-size="11">PDF / DOCX</text>
+    <text x="135" y="200" text-anchor="middle" fill="#e0e7ff" font-size="11">via FastAPI endpoint</text>
+  </g>
+
+  <!-- 2. Raw parse -->
+  <g filter="url(#soft)">
+    <rect x="250" y="135" width="170" height="80" rx="12" fill="url(#ingest)"/>
+    <text x="335" y="165" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">2. Raw Parser</text>
+    <text x="335" y="185" text-anchor="middle" fill="#e0e7ff" font-size="11">PyPDF · python-docx</text>
+    <text x="335" y="200" text-anchor="middle" fill="#e0e7ff" font-size="11">extract raw text</text>
+  </g>
+
+  <!-- 3. LLM categorize -->
+  <g filter="url(#soft)">
+    <rect x="450" y="135" width="180" height="80" rx="12" fill="url(#ingest)"/>
+    <text x="540" y="162" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">3. LLM Analyzer</text>
+    <text x="540" y="182" text-anchor="middle" fill="#e0e7ff" font-size="11">classify into sections</text>
+    <text x="540" y="198" text-anchor="middle" fill="#e0e7ff" font-size="11">chunk for embeddings</text>
+  </g>
+
+  <!-- 4. Embeddings + store -->
+  <g filter="url(#soft)">
+    <rect x="660" y="135" width="180" height="80" rx="12" fill="url(#store)"/>
+    <text x="750" y="162" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">4. Embed &amp; Persist</text>
+    <text x="750" y="182" text-anchor="middle" fill="#fff7ed" font-size="11">OpenAI embeddings</text>
+    <text x="750" y="198" text-anchor="middle" fill="#fff7ed" font-size="11">pgvector · HNSW index</text>
+  </g>
+
+  <!-- 5. UI gen -->
+  <g filter="url(#soft)">
+    <rect x="870" y="135" width="180" height="80" rx="12" fill="url(#ingest)"/>
+    <text x="960" y="162" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">5. UI Generator</text>
+    <text x="960" y="182" text-anchor="middle" fill="#e0e7ff" font-size="11">map chunks →</text>
+    <text x="960" y="198" text-anchor="middle" fill="#e0e7ff" font-size="11">portfolio components</text>
+  </g>
+
+  <!-- Manual injection -->
+  <g filter="url(#soft)">
+    <rect x="450" y="265" width="180" height="65" rx="12" fill="#334155" stroke="#64748b" stroke-width="1"/>
+    <text x="540" y="290" text-anchor="middle" fill="#f1f5f9" font-size="13" font-weight="700">Manual Ingestion</text>
+    <text x="540" y="310" text-anchor="middle" fill="#cbd5e1" font-size="11">add / edit sections</text>
+  </g>
+
+  <!-- Arrows ingestion -->
+  <line x1="220" y1="175" x2="250" y2="175" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="420" y1="175" x2="450" y2="175" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="630" y1="175" x2="660" y2="175" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="840" y1="175" x2="870" y2="175" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Manual → categorize path -->
+  <path d="M 540 265 L 540 215" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- DB node -->
+  <g filter="url(#soft)">
+    <rect x="660" y="350" width="180" height="90" rx="12" fill="url(#store)"/>
+    <text x="750" y="378" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">PostgreSQL + pgvector</text>
+    <text x="750" y="398" text-anchor="middle" fill="#fff7ed" font-size="11">chunks · embeddings · meta</text>
+    <text x="750" y="416" text-anchor="middle" fill="#fff7ed" font-size="11">HNSW index (fast ANN)</text>
+    <text x="750" y="432" text-anchor="middle" fill="#fff7ed" font-size="11">Master + Read Replica</text>
+  </g>
+
+  <!-- Arrow store → DB -->
+  <path d="M 750 215 L 750 350" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Divider -->
+  <line x1="50" y1="475" x2="1150" y2="475" stroke="#334155" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- ========== INTERACTION ROW ========== -->
+  <!-- A. User chat -->
+  <g filter="url(#soft)">
+    <rect x="50" y="510" width="170" height="80" rx="12" fill="url(#chat)"/>
+    <text x="135" y="540" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">A. Chat Input</text>
+    <text x="135" y="560" text-anchor="middle" fill="#d1fae5" font-size="11">natural-language</text>
+    <text x="135" y="575" text-anchor="middle" fill="#d1fae5" font-size="11">query</text>
+  </g>
+
+  <!-- B. Intent classifier -->
+  <g filter="url(#soft)">
+    <rect x="250" y="510" width="190" height="80" rx="12" fill="url(#chat)"/>
+    <text x="345" y="540" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">B. Intent Classifier</text>
+    <text x="345" y="560" text-anchor="middle" fill="#d1fae5" font-size="11">strict-match ruleset</text>
+    <text x="345" y="575" text-anchor="middle" fill="#d1fae5" font-size="11">cache hit? → canned reply</text>
+  </g>
+
+  <!-- Decision -->
+  <g filter="url(#soft)">
+    <polygon points="490,550 555,510 620,550 555,590" fill="#475569" stroke="#94a3b8"/>
+    <text x="555" y="545" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="700">Strict</text>
+    <text x="555" y="560" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="700">match?</text>
+  </g>
+
+  <!-- C1. Precomputed -->
+  <g filter="url(#soft)">
+    <rect x="670" y="470" width="180" height="70" rx="12" fill="#334155" stroke="#10b981" stroke-width="1.5"/>
+    <text x="760" y="498" text-anchor="middle" fill="#f1f5f9" font-size="13" font-weight="700">C1. Pre-computed reply</text>
+    <text x="760" y="518" text-anchor="middle" fill="#cbd5e1" font-size="11">low latency · cached</text>
+  </g>
+
+  <!-- C2. RAG path -->
+  <g filter="url(#soft)">
+    <rect x="670" y="560" width="180" height="80" rx="12" fill="url(#chat)"/>
+    <text x="760" y="588" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">C2. RAG Retrieval</text>
+    <text x="760" y="608" text-anchor="middle" fill="#d1fae5" font-size="11">vector search top-k</text>
+    <text x="760" y="623" text-anchor="middle" fill="#d1fae5" font-size="11">pgvector (read replica)</text>
+  </g>
+
+  <!-- D. LLM answer -->
+  <g filter="url(#soft)">
+    <rect x="890" y="560" width="170" height="80" rx="12" fill="url(#chat)"/>
+    <text x="975" y="588" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">D. LLM Response</text>
+    <text x="975" y="608" text-anchor="middle" fill="#d1fae5" font-size="11">standard prompt +</text>
+    <text x="975" y="623" text-anchor="middle" fill="#d1fae5" font-size="11">structured output format</text>
+  </g>
+
+  <!-- Arrows interaction -->
+  <line x1="220" y1="550" x2="250" y2="550" stroke="#10b981" stroke-width="2" marker-end="url(#arrowG)"/>
+  <line x1="440" y1="550" x2="490" y2="550" stroke="#10b981" stroke-width="2" marker-end="url(#arrowG)"/>
+  <path d="M 620 540 L 670 510" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowG)"/>
+  <text x="635" y="510" fill="#86efac" font-size="11" font-weight="600">yes</text>
+  <path d="M 620 560 L 670 590" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowG)"/>
+  <text x="635" y="590" fill="#86efac" font-size="11" font-weight="600">no</text>
+  <line x1="850" y1="600" x2="890" y2="600" stroke="#10b981" stroke-width="2" marker-end="url(#arrowG)"/>
+
+  <!-- RAG pulls from DB -->
+  <path d="M 760 560 C 760 500, 800 470, 800 440" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,4" fill="none" marker-end="url(#arrow)"/>
+  <text x="810" y="500" fill="#fbbf24" font-size="11">retrieve chunks</text>
+
+  <!-- Audit lane -->
+  <g filter="url(#soft)">
+    <rect x="50" y="700" width="1100" height="75" rx="12" fill="url(#audit)" opacity="0.9"/>
+    <text x="600" y="728" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Token Usage &amp; Observability Layer</text>
+    <text x="600" y="750" text-anchor="middle" fill="#fce7f3" font-size="12">every service / module audits token consumption · latency metrics · prompt &amp; response logs · feedback loop for cost + quality optimization</text>
+  </g>
+
+  <!-- Dashed lines from every component to audit lane -->
+  <g stroke="#ec4899" stroke-width="1" stroke-dasharray="2,3" opacity="0.5">
+    <line x1="135" y1="215" x2="135" y2="700"/>
+    <line x1="335" y1="215" x2="335" y2="700"/>
+    <line x1="540" y1="215" x2="540" y2="700"/>
+    <line x1="750" y1="440" x2="750" y2="700"/>
+    <line x1="960" y1="215" x2="960" y2="700"/>
+    <line x1="345" y1="590" x2="345" y2="700"/>
+    <line x1="975" y1="640" x2="975" y2="700"/>
+  </g>
+</svg>
