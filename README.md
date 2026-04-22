@@ -1,4 +1,4 @@
-# AI-Powered Interactive Portfolio Platform
+# AI-Powered Interactive Portfolio Platform - SmartFolio
 
 > A dynamic developer portfolio that turns a raw resume into a conversational, recruiter-friendly experience — powered by Retrieval-Augmented Generation.
 
