@@ -1,3 +1,4 @@
+import os
 from app.services.jwt_service import JwtService
 from fastapi import HTTPException, APIRouter, Depends, Query, Response, Request
 from app.core.logger import logger
@@ -8,6 +9,10 @@ from app.services.user_service import UserService
 
 router = APIRouter(prefix="/user", tags=["user module"])
 
+
+is_prod = os.getenv("ENVIRONMENT", "development").lower() in ["production", "prod"]
+COOKIE_SAMESITE = "none" if is_prod else "lax"
+COOKIE_SECURE = True if is_prod else False
 
 def authenticate_set_cookie(user, res: Response):
     jwt_service = JwtService()
@@ -21,8 +26,8 @@ def authenticate_set_cookie(user, res: Response):
     access_token = jwt_service.create_access_token(jwt_payload)
     refresh_token = jwt_service.create_refresh_token(jwt_payload)
 
-    res.set_cookie("_P_jwt_access", access_token, httponly=True)
-    res.set_cookie("_P_jwt_refresh", refresh_token, httponly=True)
+    res.set_cookie("_P_jwt_access", access_token, httponly=True, samesite=COOKIE_SAMESITE, secure=COOKIE_SECURE)
+    res.set_cookie("_P_jwt_refresh", refresh_token, httponly=True, samesite=COOKIE_SAMESITE, secure=COOKIE_SECURE)
 
 @router.post("/create", response_model=UserResponse)
 async def create_user(
@@ -137,8 +142,8 @@ async def refresh_access_token(req: Request, res: Response):
 
         new_access_token = jwt_service.create_access_token(access_payload)
         new_refresh_token = jwt_service.create_refresh_token(access_payload)
-        res.set_cookie("_P_jwt_access", new_access_token, httponly=True)
-        res.set_cookie("_P_jwt_refresh", new_refresh_token, httponly=True)
+        res.set_cookie("_P_jwt_access", new_access_token, httponly=True, samesite=COOKIE_SAMESITE, secure=COOKIE_SECURE)
+        res.set_cookie("_P_jwt_refresh", new_refresh_token, httponly=True, samesite=COOKIE_SAMESITE, secure=COOKIE_SECURE)
 
         logger.info("refresh_access_token route - success")
         return {"message": "Access token refreshed"}
@@ -191,6 +196,6 @@ async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_db_wr
 
 @router.post("/logout")
 async def logout_user(res: Response):
-    res.delete_cookie("_P_jwt_access")
-    res.delete_cookie("_P_jwt_refresh")
+    res.delete_cookie("_P_jwt_access", samesite=COOKIE_SAMESITE, secure=COOKIE_SECURE)
+    res.delete_cookie("_P_jwt_refresh", samesite=COOKIE_SAMESITE, secure=COOKIE_SECURE)
     return {"message": "Logged out successfully"}
