@@ -122,8 +122,8 @@ const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | '
         <img src="/guest_illustration.png" alt="Got a second?" className="w-[140px] h-auto mb-4 opacity-100" />
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">Got a second?</h3>
         <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm text-center leading-relaxed">
-          We recommend creating a unique user Index.<br />
-          It helps us better understand different users and improve answer quality.<br /><br />
+          We recommend creating a unique user Identification.<br />
+          It helps us better understand the different users and their perspective to improve answer quality.<br /><br />
           <span className="font-semibold text-gray-800 dark:text-gray-200">No personal data is collected — it's just for indexing purposes.</span>
         </p>
         <div className="flex flex-col gap-3 w-full">
@@ -180,7 +180,11 @@ const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | '
         </button>
       </div>
 
-      <button onClick={handleGuestClick} className="mt-6 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-0 bg-transparent cursor-pointer transition-colors">
+      <button
+        onClick={handleGuestClick}
+        disabled={!isTypingComplete}
+        className={`mt-6 text-sm ${isTypingComplete ? "text-gray-700 hover:text-[indigo]/60 dark:hover:text-[indigo]/60" : "text-gray-300 "} border-0 bg-transparent cursor-pointer transition-colors`}
+      >
         Continue as Guest
       </button>
     </div>
