@@ -24,8 +24,7 @@ const TypingHeading = memo(({ fullText, isActiveResumeLoading, isTypingComplete,
     }, [fullText, isActiveResumeLoading, setIsTypingComplete])
 
     return (
-        <div className="relative w-full mb-2 min-h-[28px] flex justify-center text-center">
-
+        <div className="relative w-full mb-3 sm:my-4.5 min-h-[28px] flex justify-center text-center">
             {
                 isActiveResumeLoading ?
                     <div className="flex items-center justify-center">
