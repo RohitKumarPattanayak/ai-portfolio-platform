@@ -66,6 +66,7 @@ async def get_portfolio(db: AsyncSession = Depends(get_db_write)):
         result = await db.execute(
             select(ResumeChunkModel.section, ResumeChunkModel.meta_data, ResumeChunkModel.content)
             .where(ResumeChunkModel.resume_id == active_resume.id)
+            .order_by(ResumeChunkModel.id.asc())
         )
 
         rows = result.all()
